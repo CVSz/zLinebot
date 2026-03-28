@@ -1,6 +1,6 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
 
-const client = new QdrantClient({ url: "http://qdrant:6333" });
+const client = new QdrantClient({ url: process.env.QDRANT_URL ?? "http://qdrant:6333" });
 
 export async function saveMemory(userId: string, text: string, vector: number[]) {
   await client.upsert("memory", {
@@ -12,4 +12,8 @@ export async function saveMemory(userId: string, text: string, vector: number[])
       }
     ]
   });
+}
+
+export async function searchMemory(vector: number[]) {
+  return client.search("memory", { vector, limit: 5 });
 }

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zlinebot
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zlinebot
+  template:
+    metadata:
+      labels:
+        app: zlinebot
+    spec:
+      containers:
+        - name: app
+          image: yourrepo/zlinebot:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: zlinebot-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
