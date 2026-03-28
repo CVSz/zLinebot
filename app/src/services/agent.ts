@@ -1,12 +1,15 @@
 import { generateReply } from "./ai.js";
-import { recommendProducts } from "./recommend.js";
+import { rankProducts } from "./rank.js";
+import { updateSession } from "./sessionUpdate.js";
 
 export async function salesAgent(input: { tenantId: string; userId: string; text: string }) {
-  const { tenantId, text } = input;
+  const { tenantId, userId, text } = input;
   const wantsBuy = /buy|ราคา|price|มีอะไรบ้าง/i.test(text);
 
+  await updateSession(tenantId, userId, text);
+
   if (wantsBuy) {
-    const items = await recommendProducts(tenantId, text);
+    const items = await rankProducts(tenantId, userId, text);
     if (items.length > 0) {
       return { type: "products" as const, data: items };
     }
