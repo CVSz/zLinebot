@@ -23,6 +23,24 @@ type Candidate = {
   description: string | null;
 };
 
+type HybridSignals = {
+  transformerScore: number;
+  banditScore: number;
+  upliftScore: number;
+};
+
+function normalizeScore(value: number) {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return 1 / (1 + Math.exp(-value));
+}
+
+export function hybridRankScore({ transformerScore, banditScore, upliftScore }: HybridSignals) {
+  return 0.4 * transformerScore + 0.3 * banditScore + 0.3 * upliftScore;
+}
+
 async function resolveUserVec(userId: string, fallback: number[]) {
   const result = await db.query<{ vector: number[] }>(
     "SELECT vector FROM user_embeddings WHERE user_id = $1",
@@ -54,20 +72,24 @@ export async function rankProducts(tenantId: string, userId: string, query: stri
   const ranked = await Promise.all(
     rows.map(async (row: Candidate) => {
       const productVec = await embed(`${row.name} ${row.description ?? ""}`);
-      const fallbackScore =
-        0.5 * dot(queryVec, productVec) +
-        0.3 * dot(sessionVec, productVec) +
-        0.15 * dot(userVec, productVec) +
-        0.05 * (1 / Math.max(1, Number(row.price)));
 
-      const modelScore =
+      const transformerScore = normalizeScore(dot(queryVec, productVec));
+      const banditScore = normalizeScore(dot(sessionVec, productVec));
+
+      const upliftBase =
+        0.7 * dot(userVec, productVec) + 0.3 * (1 / Math.max(1, Number(row.price)));
+      const upliftScore =
         isModelLoaded() && queryVec.length > 0
-          ? await inferScore(queryVec, userVec, sessionVec)
-          : fallbackScore;
+          ? normalizeScore(await inferScore(queryVec, userVec, sessionVec))
+          : normalizeScore(upliftBase);
 
       return {
         ...row,
-        score: modelScore
+        score: hybridRankScore({
+          transformerScore,
+          banditScore,
+          upliftScore
+        })
       };
     })
   );

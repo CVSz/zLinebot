@@ -15,6 +15,7 @@ import adminBillingRouter from "./routes/admin.billing.js";
 import { startAggregator } from "./services/analytics.js";
 import { startWS } from "./ws.js";
 import { startFeatureSyncConsumer } from "./services/feature.sync.js";
+import { feedbackRouter } from "./routes/feedback.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/", tenant, setTenantSchema, cartRouter);
 app.use("/", tenant, setTenantSchema, ordersRouter);
 app.use("/", tenant, setTenantSchema, adminRouter);
 app.use("/", tenant, setTenantSchema, adminBillingRouter);
+app.use("/", feedbackRouter);
 
 const server = http.createServer(app);
 

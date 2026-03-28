@@ -1,9 +1,10 @@
 declare module "onnxruntime-node" {
-  export type TensorType = "float32";
+  export type TensorType = "float32" | "int64";
 
   export class Tensor {
-    constructor(type: TensorType, data: Float32Array, dims: number[]);
-    data: ArrayLike<number>;
+    constructor(type: "float32", data: Float32Array, dims: number[]);
+    constructor(type: "int64", data: BigInt64Array, dims: number[]);
+    data: ArrayLike<number | bigint>;
   }
 
   export type InferenceSessionOutput = Record<string, Tensor>;
