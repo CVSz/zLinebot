@@ -10,6 +10,7 @@ services:
       - redis
       - qdrant
       - ollama
+      - kafka
 
   admin:
     build: ./admin
@@ -33,6 +34,21 @@ services:
     image: ollama/ollama
     volumes:
       - ollama:/root/.ollama
+
+  zookeeper:
+    image: bitnami/zookeeper
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+
+  kafka:
+    image: bitnami/kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "9092:9092"
 
   nginx:
     image: nginx:alpine
