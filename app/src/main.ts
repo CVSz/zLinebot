@@ -3,6 +3,7 @@ import express from "express";
 import { env } from "./utils/env.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { tenant } from "./middleware/tenant.js";
+import { setTenantSchema } from "./middleware/schema.js";
 import { productsRouter } from "./routes/products.js";
 import { cartRouter } from "./routes/cart.js";
 import { ordersRouter } from "./routes/orders.js";
@@ -27,11 +28,11 @@ app.get("/health", (_req, res) => {
 
 app.use("/webhook", promptpayWebhookRouter);
 app.use("/", webhookRouter);
-app.use("/", tenant, productsRouter);
-app.use("/", tenant, cartRouter);
-app.use("/", tenant, ordersRouter);
-app.use("/", tenant, adminRouter);
-app.use("/", tenant, adminBillingRouter);
+app.use("/", tenant, setTenantSchema, productsRouter);
+app.use("/", tenant, setTenantSchema, cartRouter);
+app.use("/", tenant, setTenantSchema, ordersRouter);
+app.use("/", tenant, setTenantSchema, adminRouter);
+app.use("/", tenant, setTenantSchema, adminBillingRouter);
 
 const server = http.createServer(app);
 

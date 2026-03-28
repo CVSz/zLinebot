@@ -8,8 +8,8 @@ type QdrantPoint = {
   id: string | number;
 };
 
-export async function recommendVector(tenantId: string, query: string) {
-  const vector = await embed(query);
+export async function recommendVector(tenantId: string, query: string, vectorOverride?: number[]) {
+  const vector = vectorOverride ?? (await embed(query));
 
   const result = await client.search("products", {
     vector,
