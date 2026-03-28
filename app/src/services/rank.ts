@@ -3,6 +3,7 @@ import { embed } from "./embed.js";
 import { inferScore, isModelLoaded } from "./infer.js";
 import { getSessionVec } from "./session.js";
 import { selectArm } from "./bandit.js";
+import { isFoundationLoaded, rankBatch } from "./foundation.js";
 
 function dot(a: number[], b: number[]) {
   const size = Math.max(a.length, b.length);
@@ -24,9 +25,11 @@ type Candidate = {
 };
 
 type HybridSignals = {
+  foundationScore: number;
   transformerScore: number;
   banditScore: number;
   upliftScore: number;
+  rlScore: number;
 };
 
 function normalizeScore(value: number) {
@@ -37,8 +40,20 @@ function normalizeScore(value: number) {
   return 1 / (1 + Math.exp(-value));
 }
 
-export function hybridRankScore({ transformerScore, banditScore, upliftScore }: HybridSignals) {
-  return 0.4 * transformerScore + 0.3 * banditScore + 0.3 * upliftScore;
+export function hybridRankScore({
+  foundationScore,
+  transformerScore,
+  banditScore,
+  upliftScore,
+  rlScore
+}: HybridSignals) {
+  return (
+    0.4 * foundationScore +
+    0.2 * transformerScore +
+    0.15 * banditScore +
+    0.15 * upliftScore +
+    0.1 * rlScore
+  );
 }
 
 async function resolveUserVec(userId: string, fallback: number[]) {
@@ -48,6 +63,12 @@ async function resolveUserVec(userId: string, fallback: number[]) {
   );
 
   return result.rows[0]?.vector ?? fallback;
+}
+
+function estimateRlScore(sessionVec: number[], productVec: number[], stock: number) {
+  const affinity = normalizeScore(dot(sessionVec, productVec));
+  const inventoryPressure = stock <= 0 ? -1 : Math.min(1, Math.log1p(stock) / 4);
+  return normalizeScore(0.8 * affinity + 0.2 * inventoryPressure);
 }
 
 export async function rankProducts(tenantId: string, userId: string, query: string, limit = 5) {
@@ -69,10 +90,38 @@ export async function rankProducts(tenantId: string, userId: string, query: stri
   const sessionVec = (await getSessionVec(tenantId, userId)) ?? queryVec;
   const userVec = await resolveUserVec(userId, queryVec);
 
-  const ranked = await Promise.all(
+  const embeddedRows: Array<{ row: Candidate; productVec: number[] }> = await Promise.all(
     rows.map(async (row: Candidate) => {
       const productVec = await embed(`${row.name} ${row.description ?? ""}`);
+      return { row, productVec };
+    })
+  );
 
+  let foundationScores: number[] = embeddedRows.map(() => 0);
+  if (isFoundationLoaded()) {
+    try {
+      const foundationFeatures = embeddedRows.map(({ productVec }: { row: Candidate; productVec: number[] }) => {
+        const fused: number[] = [];
+        const size = Math.max(queryVec.length, userVec.length, sessionVec.length, productVec.length);
+        for (let i = 0; i < size; i += 1) {
+          fused.push(
+            (queryVec[i] ?? 0) * 0.25 +
+              (userVec[i] ?? 0) * 0.35 +
+              (sessionVec[i] ?? 0) * 0.25 +
+              (productVec[i] ?? 0) * 0.15
+          );
+        }
+        return fused;
+      });
+
+      foundationScores = (await rankBatch(foundationFeatures)).map((v) => normalizeScore(v));
+    } catch {
+      foundationScores = embeddedRows.map(() => 0);
+    }
+  }
+
+  const ranked = await Promise.all(
+    embeddedRows.map(async ({ row, productVec }: { row: Candidate; productVec: number[] }, idx: number) => {
       const transformerScore = normalizeScore(dot(queryVec, productVec));
       const banditScore = normalizeScore(dot(sessionVec, productVec));
 
@@ -83,12 +132,16 @@ export async function rankProducts(tenantId: string, userId: string, query: stri
           ? normalizeScore(await inferScore(queryVec, userVec, sessionVec))
           : normalizeScore(upliftBase);
 
+      const rlScore = estimateRlScore(sessionVec, productVec, row.stock);
+
       return {
         ...row,
         score: hybridRankScore({
+          foundationScore: foundationScores[idx] ?? 0,
           transformerScore,
           banditScore,
-          upliftScore
+          upliftScore,
+          rlScore
         })
       };
     })
