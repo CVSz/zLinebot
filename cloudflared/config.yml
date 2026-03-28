@@ -1,0 +1,7 @@
+tunnel: zlinebot
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  - hostname: zlinebot.zeaz.dev
+    service: http://nginx:80
+  - service: http_status:404
