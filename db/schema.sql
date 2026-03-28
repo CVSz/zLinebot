@@ -1,0 +1,24 @@
+CREATE TABLE IF NOT EXISTS products (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  price NUMERIC(12,2) NOT NULL,
+  stock INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS carts (
+  id SERIAL PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  product_id INT NOT NULL REFERENCES products(id),
+  qty INT NOT NULL DEFAULT 1,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+  id SERIAL PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  total NUMERIC(12,2) NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  payment_qr TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
