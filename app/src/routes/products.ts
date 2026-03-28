@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "../db.js";
 import { indexProduct } from "../services/reco.index.js";
+import { onClick, onView } from "../services/events.reward.js";
 
 export const productsRouter = Router();
 
@@ -31,4 +32,31 @@ productsRouter.post("/products", async (req, res) => {
   });
 
   res.status(201).json(result.rows[0]);
+});
+
+
+productsRouter.post("/events/view", async (req, res) => {
+  const tenantId = req.header("x-tenant-id") ?? "demo";
+  const { productId } = req.body as { productId?: string | number };
+
+  if (!productId) {
+    res.status(400).json({ error: "productId is required" });
+    return;
+  }
+
+  await onView(tenantId, String(productId));
+  res.status(202).json({ status: "accepted" });
+});
+
+productsRouter.post("/events/click", async (req, res) => {
+  const tenantId = req.header("x-tenant-id") ?? "demo";
+  const { productId } = req.body as { productId?: string | number };
+
+  if (!productId) {
+    res.status(400).json({ error: "productId is required" });
+    return;
+  }
+
+  await onClick(tenantId, String(productId));
+  res.status(202).json({ status: "accepted" });
 });

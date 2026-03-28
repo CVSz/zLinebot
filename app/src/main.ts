@@ -14,6 +14,7 @@ import promptpayWebhookRouter from "./routes/webhook.promptpay.js";
 import adminBillingRouter from "./routes/admin.billing.js";
 import { startAggregator } from "./services/analytics.js";
 import { startWS } from "./ws.js";
+import { startFeatureSyncConsumer } from "./services/feature.sync.js";
 
 const app = express();
 
@@ -37,6 +38,14 @@ app.use("/", tenant, setTenantSchema, adminBillingRouter);
 const server = http.createServer(app);
 
 startAggregator();
+
+if ((process.env.FEATURE_SYNC_ENABLED ?? "false") === "true") {
+  startFeatureSyncConsumer().catch((error: unknown) => {
+    // eslint-disable-next-line no-console
+    console.error("failed to start feature sync consumer", error);
+  });
+}
+
 startWS(server, (req) => {
   const hostTenant = req.headers["x-tenant-id"];
   return Array.isArray(hostTenant) ? hostTenant[0] : hostTenant;
