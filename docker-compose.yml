@@ -63,6 +63,18 @@ services:
       - "3001:3000"
     depends_on:
       - clickhouse
+
+  flink-jobmanager:
+    image: flink:1.18
+    command: jobmanager
+    ports:
+      - "8081:8081"
+
+  flink-taskmanager:
+    image: flink:1.18
+    command: taskmanager
+    depends_on:
+      - flink-jobmanager
   nginx:
     image: nginx:alpine
     ports:

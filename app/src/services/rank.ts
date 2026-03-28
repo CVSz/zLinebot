@@ -2,6 +2,7 @@ import { db } from "../db.js";
 import { embed } from "./embed.js";
 import { inferScore, isModelLoaded } from "./infer.js";
 import { getSessionVec } from "./session.js";
+import { selectArm } from "./bandit.js";
 
 function dot(a: number[], b: number[]) {
   const size = Math.max(a.length, b.length);
@@ -71,5 +72,19 @@ export async function rankProducts(tenantId: string, userId: string, query: stri
     })
   );
 
-  return ranked.sort((a: { score: number }, b: { score: number }) => b.score - a.score).slice(0, limit);
+  const sorted = ranked
+    .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
+    .slice(0, limit);
+
+  const candidateIds = sorted.map((item: Candidate & { score: number }) => String(item.id));
+  const chosenId = await selectArm(tenantId, candidateIds);
+
+  if (chosenId) {
+    sorted.sort(
+      (a: Candidate & { score: number }, b: Candidate & { score: number }) =>
+        (String(a.id) === chosenId ? -1 : 0) - (String(b.id) === chosenId ? -1 : 0)
+    );
+  }
+
+  return sorted;
 }
