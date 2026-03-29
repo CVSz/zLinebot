@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 
 const redisUrl = process.env.REDIS_URL;
 
@@ -37,7 +37,7 @@ export function startAggregator() {
     console.error("failed to subscribe events", error);
   });
 
-  sub.on("message", (_ch, msg) => {
+  sub.on("message", (_ch: string, msg: string) => {
     const e: EventPayload = JSON.parse(msg);
     const key = `${e.tenantId}:${e.type}`;
     counters.set(key, (counters.get(key) || 0) + 1);
