@@ -54,6 +54,7 @@ Endpoints:
 - [Install Manual (TH)](install_manual_th.md)
 
 ### Project Documents
+- [Repository Structure & Upgrade Readiness](docs/REPO_STRUCTURE.md)
 - [Blueprint (EN)](blueprint_en.md)
 - [Blueprint (TH)](blueprint_th.md)
 - [Roadmap (EN)](roadmaps_en.md)
