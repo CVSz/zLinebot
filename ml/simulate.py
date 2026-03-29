@@ -1,10 +1,8 @@
-from typing import List
-
 import torch
 
 
 @torch.no_grad()
-def simulate(model, state: torch.Tensor, steps: int = 10) -> List[torch.Tensor]:
+def simulate(model, state: torch.Tensor, steps: int = 10) -> list[torch.Tensor]:
     trajectory = []
     current = state
 

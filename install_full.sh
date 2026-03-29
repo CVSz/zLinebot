@@ -17,10 +17,12 @@ fi
 
 cd zLinebot
 
-cp .env.example .env || true
+if [ -f .env.example ] && [ ! -f .env ]; then
+  cp .env.example .env
+fi
 
 # --- python deps ---
-pip install torch shap Pyfhel scikit-learn
+python3 -m pip install torch shap Pyfhel scikit-learn
 
 # --- start infra ---
 docker compose up -d --build
