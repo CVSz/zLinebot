@@ -1,0 +1,5 @@
+records:
+  - name: "*.zeaz.dev"
+    type: CNAME
+    value: <tunnel-id>.cfargotunnel.com
+    proxied: true

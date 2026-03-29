@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  app:
+    build: ../app
+    env_file: ../.env
+    ports:
+      - "3000:3000"
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: strongpass
+
+  redis:
+    image: redis:7
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    command: ["redpanda","start","--overprovisioned","--smp=1","--memory=1G","--reserve-memory=0M","--node-id=0","--check=false"]
+    ports:
+      - "9092:9092"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001:3000"
+
+  loki:
+    image: grafana/loki:2.9.8
+    ports:
+      - "3100:3100"
