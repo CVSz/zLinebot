@@ -24,6 +24,7 @@ echo "==> Building admin frontend"
 
 echo "==> Shellcheck (*.sh)"
 find . -type f -name '*.sh' \
+  -not -path './.git/*' \
   -not -path './admin/node_modules/*' \
   -not -path './app/node_modules/*' \
   -print0 | xargs -0 -r shellcheck
