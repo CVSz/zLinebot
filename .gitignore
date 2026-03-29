@@ -30,3 +30,15 @@ pnpm-debug.log*
 .DS_Store
 .vscode/
 .idea/
+
+# Local tooling caches
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Temp files
+*.swp
+*.swo
+*~
