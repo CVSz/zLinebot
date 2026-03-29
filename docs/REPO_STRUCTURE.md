@@ -13,6 +13,8 @@
 - `ml/` — โมดูล ML simulation/training
 - `scripts/` — automation scripts สำหรับ install/lint/deploy
 
+> Note: เอกสาร `readme_en.md` และ `readme_th.md` ถูกย้ายไปที่ `docs/` แล้ว
+
 ## 2) จุดที่ควรยึดเป็นมาตรฐานก่อนอัปเกรด
 
 1. **Environment contract เดียวกันทุก service**
@@ -38,4 +40,3 @@
 - ตรวจ webhook signature/key rotation
 - ตรวจเวอร์ชัน dependencies สำคัญ (`express`, `typescript`, `stripe`, `kafkajs`, `onnxruntime-node`)
 - อัปเดตเอกสารใน `docs/` หากมี endpoint หรือ behavior เปลี่ยน
-

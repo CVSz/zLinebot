@@ -4,8 +4,12 @@ function parsePort(value: string | undefined): number {
     return fallbackPort;
   }
 
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 65535) {
+  if (!/^\d+$/.test(value)) {
+    return fallbackPort;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > 65535) {
     return fallbackPort;
   }
 
