@@ -4,6 +4,7 @@ import { inferScore, isModelLoaded } from "./infer.js";
 import { getSessionVec } from "./session.js";
 import { selectArm } from "./bandit.js";
 import { isFoundationLoaded, rankBatch } from "./foundation.js";
+import { explain } from "./explain.js";
 
 function dot(a: number[], b: number[]) {
   const size = Math.max(a.length, b.length);
@@ -134,15 +135,27 @@ export async function rankProducts(tenantId: string, userId: string, query: stri
 
       const rlScore = estimateRlScore(sessionVec, productVec, row.stock);
 
+      const score = hybridRankScore({
+        foundationScore: foundationScores[idx] ?? 0,
+        transformerScore,
+        banditScore,
+        upliftScore,
+        rlScore
+      });
+
+      let explanation: { shapValues: number[]; modelVersion?: string } | null = null;
+      if ((process.env.EXPLAINABILITY_ENABLED ?? "false") === "true") {
+        try {
+          explanation = await explain([transformerScore, banditScore, upliftScore, rlScore, score]);
+        } catch {
+          explanation = null;
+        }
+      }
+
       return {
         ...row,
-        score: hybridRankScore({
-          foundationScore: foundationScores[idx] ?? 0,
-          transformerScore,
-          banditScore,
-          upliftScore,
-          rlScore
-        })
+        score,
+        explanation
       };
     })
   );
