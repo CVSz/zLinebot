@@ -1,0 +1,8 @@
+pools:
+  - name: primary
+    origins: [LOCAL_IP]
+  - name: backup
+    origins: [fly-app.fly.dev]
+load_balancer:
+  default_pools: [primary, backup]
+  fallback_pool: backup

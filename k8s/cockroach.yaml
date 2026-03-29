@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cockroachdb
+  namespace: zlinebot
+spec:
+  serviceName: cockroachdb
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cockroachdb
+  template:
+    metadata:
+      labels:
+        app: cockroachdb
+    spec:
+      containers:
+        - name: crdb
+          image: cockroachdb/cockroach
+          args: ["start", "--insecure"]
+          ports:
+            - containerPort: 26257
+            - containerPort: 8080

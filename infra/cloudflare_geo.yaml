@@ -1,0 +1,5 @@
+rules:
+  - if: country == "TH"
+    origin: asia-cluster
+  - else:
+    origin: us-cluster

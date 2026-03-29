@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-zeaz
+  namespace: zlinebot
+spec:
+  secretName: zeaz-tls
+  dnsNames:
+    - "*.zeaz.dev"
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
