@@ -1,4 +1,5 @@
 import { WebSocketServer } from "ws";
+import type WebSocket from "ws";
 import type { IncomingMessage } from "http";
 import type { Server as HttpServer } from "http";
 import { snapshot } from "./services/analytics.js";
@@ -6,7 +7,7 @@ import { snapshot } from "./services/analytics.js";
 export function startWS(server: HttpServer, getTenantIdFromReq: (req: IncomingMessage) => string | undefined) {
   const wss = new WebSocketServer({ server, path: "/ws" });
 
-  wss.on("connection", (ws, req) => {
+  wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
     const tenantId = getTenantIdFromReq(req) ?? "demo";
 
     const interval = setInterval(() => {
