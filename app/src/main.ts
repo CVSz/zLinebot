@@ -16,12 +16,14 @@ import { startAggregator } from "./services/analytics.js";
 import { startWS } from "./ws.js";
 import { startFeatureSyncConsumer } from "./services/feature.sync.js";
 import { feedbackRouter } from "./routes/feedback.js";
+import { trace } from "./middleware/trace.js";
 
 const app = express();
 
 app.use("/webhook", stripeWebhookRouter);
 
 app.use(express.json());
+app.use(trace);
 app.use(rateLimit);
 
 app.get("/health", (_req, res) => {
