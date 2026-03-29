@@ -1,5 +1,5 @@
-import numpy as np
 import gym
+import numpy as np
 from gym import spaces
 
 
@@ -62,7 +62,9 @@ class MarketEnv(gym.Env):
             self.rng = np.random.default_rng(seed)
 
         self.user = self.rng.normal(0, 1, size=self.user_dim).astype(np.float32)
-        self.item_embeddings = self.rng.normal(0, 1, size=(self.n_items, self.user_dim)).astype(np.float32)
+        self.item_embeddings = self.rng.normal(
+            0, 1, size=(self.n_items, self.user_dim)
+        ).astype(np.float32)
         self._sample_seller_state()
         self.budget = float(self.rng.uniform(1.0, 5.0))
         self.t = 0

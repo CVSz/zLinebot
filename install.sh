@@ -22,11 +22,13 @@ fi
 cd zLinebot
 
 # --- env ---
-cp .env.example .env || true
+if [ -f .env.example ] && [ ! -f .env ]; then
+  cp .env.example .env
+fi
 
 # --- ollama ---
 docker run -d --name ollama -p 11434:11434 ollama/ollama || true
-docker exec ollama ollama pull mistral
+docker exec ollama ollama pull mistral || true
 
 # --- run stack ---
 docker compose up -d --build
