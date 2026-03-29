@@ -17,6 +17,9 @@ import { startWS } from "./ws.js";
 import { startFeatureSyncConsumer } from "./services/feature.sync.js";
 import { feedbackRouter } from "./routes/feedback.js";
 import { trace } from "./middleware/trace.js";
+import { dsrRouter } from "./routes/dsr.js";
+import { auditRouter } from "./routes/audit.js";
+import { health } from "./health.js";
 
 const app = express();
 
@@ -26,9 +29,7 @@ app.use(express.json());
 app.use(trace);
 app.use(rateLimit);
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
+app.get("/health", health);
 
 app.use("/webhook", promptpayWebhookRouter);
 app.use("/", webhookRouter);
@@ -38,6 +39,8 @@ app.use("/", tenant, setTenantSchema, ordersRouter);
 app.use("/", tenant, setTenantSchema, adminRouter);
 app.use("/", tenant, setTenantSchema, adminBillingRouter);
 app.use("/", feedbackRouter);
+app.use("/", tenant, setTenantSchema, dsrRouter);
+app.use("/", tenant, setTenantSchema, auditRouter);
 
 const server = http.createServer(app);
 
