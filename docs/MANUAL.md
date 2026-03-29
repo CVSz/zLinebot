@@ -21,6 +21,8 @@ Android deployment installer:
 ./scripts/install_android_deploy.sh
 ```
 
+> Linux note: currently targets Debian/Ubuntu systems (uses `apt`).
+
 iOS deployment installer (macOS only):
 
 ```bash
@@ -32,6 +34,8 @@ Full-stack mobile deployment installer:
 ```bash
 ./scripts/install_mobile_fullstack_deploy.sh
 ```
+
+> Linux note: currently targets Debian/Ubuntu systems (uses `apt`).
 
 Meta full-stack Android application deployment installer:
 
