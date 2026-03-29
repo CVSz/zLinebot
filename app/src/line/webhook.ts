@@ -1,12 +1,111 @@
-import { Router } from "express";
+import crypto from "crypto";
+import express, { Router } from "express";
 import { handleMessage } from "./handler.js";
+
+type LineTextMessageEvent = {
+  type: "message";
+  replyToken: string;
+  source?: { userId?: string };
+  message: {
+    type: "text";
+    text: string;
+  };
+};
+
+type LineWebhookBody = {
+  events?: LineTextMessageEvent[];
+};
+
+type RawRequest = {
+  rawBody?: string;
+};
+
+const lineApiReplyEndpoint = "https://api.line.me/v2/bot/message/reply";
 
 export const webhookRouter = Router();
 
-webhookRouter.post("/webhook", async (req, res) => {
-  const text = req.body?.text ?? "";
-  const userId = req.body?.userId ?? "anonymous";
-  const tenantId = req.header("x-tenant-id") ?? req.body?.tenantId ?? "demo";
-  const reply = await handleMessage(text, tenantId, userId);
-  res.json({ reply });
-});
+webhookRouter.post(
+  "/webhook",
+  express.json({
+    verify: (req, _res, buf) => {
+      (req as RawRequest).rawBody = buf.toString("utf8");
+    }
+  }),
+  async (req, res) => {
+    const channelSecret = process.env.LINE_CHANNEL_SECRET;
+    const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    const signature = req.header("x-line-signature");
+
+    if (!channelSecret || !channelAccessToken) {
+      return res.status(500).json({ error: "line credentials are not configured" });
+    }
+
+    if (!signature) {
+      return res.status(401).send("missing signature");
+    }
+
+    const rawBody = (req as RawRequest).rawBody ?? JSON.stringify(req.body);
+    const hash = crypto.createHmac("sha256", channelSecret).update(rawBody).digest("base64");
+
+    if (hash !== signature) {
+      return res.status(401).send("invalid signature");
+    }
+
+    const body = (req.body ?? {}) as LineWebhookBody;
+    const events = body.events ?? [];
+
+    res.sendStatus(200);
+
+    void Promise.all(events.map((event) => handleEvent(event, channelAccessToken))).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error("line webhook processing failed", error);
+    });
+  }
+);
+
+async function handleEvent(event: LineTextMessageEvent, channelAccessToken: string) {
+  if (event.type !== "message" || event.message.type !== "text") {
+    return;
+  }
+
+  const tenantId = "demo";
+  const userId = event.source?.userId ?? "anonymous";
+
+  const replyPayload = await withTimeout(
+    handleMessage(event.message.text, tenantId, userId),
+    700,
+    { type: "text", text: "ระบบกำลังประมวลผลอยู่ กรุณาลองใหม่อีกครั้งครับ" }
+  );
+
+  const message =
+    replyPayload.type === "text"
+      ? replyPayload
+      : { type: "text", text: "รองรับข้อความแบบ text ใน LINE ตอนนี้เท่านั้น" };
+
+  await fetch(lineApiReplyEndpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${channelAccessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      replyToken: event.replyToken,
+      messages: [message]
+    })
+  });
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  let timeoutHandle: NodeJS.Timeout | undefined;
+
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timeoutHandle = setTimeout(() => resolve(fallback), timeoutMs);
+  });
+
+  const result = await Promise.race([promise, timeoutPromise]);
+  if (timeoutHandle) {
+    clearTimeout(timeoutHandle);
+  }
+
+  return result;
+}

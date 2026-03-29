@@ -25,14 +25,15 @@ const app = express();
 
 app.use("/webhook", stripeWebhookRouter);
 
-app.use(express.json());
 app.use(trace);
 app.use(rateLimit);
+
+app.use("/", webhookRouter);
+app.use(express.json());
 
 app.get("/health", health);
 
 app.use("/webhook", promptpayWebhookRouter);
-app.use("/", webhookRouter);
 app.use("/", tenant, setTenantSchema, productsRouter);
 app.use("/", tenant, setTenantSchema, cartRouter);
 app.use("/", tenant, setTenantSchema, ordersRouter);
