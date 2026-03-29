@@ -15,7 +15,7 @@
     "qrcode": "^1.5.4",
     "stripe": "^17.5.0",
     "ws": "^8.18.0",
-    "fast-embed": "^0.7.3",
+    "fastembed": "^2.1.0",
     "kafkajs": "^2.2.4",
     "onnxruntime-node": "^1.22.0"
   },
