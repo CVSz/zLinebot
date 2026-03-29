@@ -1,39 +1,44 @@
 # คู่มือแอดมิน ZLineBot (TH)
 
-## ขอบเขตงานแอดมิน
-ดูแล tenant, การเงิน, compliance, observability และการรับมือ incident
+## 1. ขอบเขตงานปฏิบัติการ
+แอดมินดูแลการตั้งค่า tenant การเงิน compliance และการรับมือ incident
 
-## ช่องทางแอดมิน
-- Dashboard: ดู metrics แบบเรียลไทม์จาก `/ws`
-- Billing: `/admin/billing`
-- API สำหรับแอดมิน:
+## 2. ช่องทางแอดมิน
+- หน้าเว็บ dashboard (`admin/`) สำหรับ realtime metrics
+- API สำคัญ:
   - `GET /admin/health`
   - `GET /admin/billing`
   - `POST /admin/audit/ledger-export`
   - `POST /privacy/consent`
   - `POST /privacy/dsr`
 
-## การควบคุมสิทธิ์
-- `x-api-key` ต้องตรงกับ `TENANT_API_KEY`
-- tenant มาจาก `x-tenant-id` (ค่าเริ่มต้น `demo`)
-- schema ที่ใช้งาน: `tenant_<id>, public`
+## 3. โมเดลการควบคุมสิทธิ์
+- middleware ตรวจ `x-api-key`
+- ใช้ `x-tenant-id` เพื่อกำหนด tenant
+- ตั้ง schema เป็น `tenant_<id>, public`
 
-## งานด้านบิล
-1. ตรวจสอบว่ามีข้อมูลใบแจ้งหนี้
-2. ตรวจสอบ header tenant/api-key จากฝั่งแอดมิน
-3. กระทบยอดกับข้อมูล order/payment
+## 4. Runbook ด้านบิล
+1. ตรวจว่ามี invoice
+2. ตรวจ header ของ tenant ให้ถูกต้อง
+3. กระทบยอดข้อมูล order และ payment
 
-## ออดิทและความเป็นส่วนตัว
-- Ledger export: `POST /admin/audit/ledger-export`
-- Consent endpoints
-- DSR: `access`, `delete`, `rectify`
+## 5. Runbook ด้าน Privacy/Compliance
+- บันทึกและตรวจสอบ consent
+- ดำเนินการ DSR (`access`, `delete`, `rectify`)
+- ส่งออก ledger สำหรับ audit
 
-## การเฝ้าระวังระบบ
-- Events: `message`, `order`, `payment`
+## 6. การเฝ้าระวังระบบ
 - Health: `GET /health`
-- Realtime metrics ทาง websocket ทุก 1 วินาที
+- Realtime metrics: `/ws`
+- กลุ่มเหตุการณ์: message/order/payment
 
-## แนวทางรับมือเหตุขัดข้อง
-- 401 พุ่ง: ตรวจคีย์/การตั้งค่า
-- 429 พุ่ง: ตรวจ retry loop หรือทราฟฟิกผิดปกติ
-- ไม่เห็น metrics: ตรวจ Redis, websocket route, event emission
+## 7. แนวทางรับมือ incident
+- 401 พุ่ง: ตรวจ key rotation และ env
+- 429 พุ่ง: ตรวจทราฟฟิกผิดปกติ/retry loop
+- metrics หาย: ตรวจ Redis/event publish/websocket path
+
+## 8. เช็กลิสต์ความปลอดภัย
+- ห้ามเปิดเผย API key
+- บังคับ TLS ที่ edge
+- มี backup และซ้อม restore
+- จำกัดการเข้าถึงระบบแอดมิน

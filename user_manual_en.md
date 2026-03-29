@@ -1,47 +1,45 @@
 # ZLineBot User Manual (EN)
 
-## Overview
-ZLineBot is a chat-commerce assistant for browsing products, managing carts, creating orders, and submitting privacy requests via LINE and API.
+## 1. Platform Overview
+ZLineBot supports conversational shopping via LINE and API-based commerce flows.
 
-## Quick Commands
-- Product intent: `buy`, `price`, `มีอะไรบ้าง`, `ราคา`
-- Browse products: `GET /products`
-- Add cart item: `POST /cart`
-- Create order: `POST /orders`
+## 2. User Capabilities
+- View products (`GET /products`)
+- Add to cart (`POST /cart`)
+- View cart (`GET /cart/:userId`)
+- Place orders (`POST /orders`)
+- Submit privacy consent and DSR requests
 
-## Required Headers
+## 3. Required Headers
 - `x-api-key: <TENANT_API_KEY>`
 - `x-tenant-id: <tenant_id>`
 
-## API Usage
-### Products
-- `GET /products`
-- `POST /products`
+## 4. Product and Cart Flow
+1. Fetch product list.
+2. Select product and quantity.
+3. Add item to cart.
+4. Review cart before checkout.
 
-### Cart
-- `GET /cart/:userId`
-- `POST /cart`
+## 5. Order and Payment Flow
+- Create order with `paymentMethod`:
+  - `promptpay` (QR path)
+  - `stripe` (checkout URL when configured)
 
-### Orders
-- `GET /orders`
-- `POST /orders`
-- `paymentMethod`: `promptpay` (QR) or `stripe` (checkout URL)
+## 6. LINE Chat Usage
+- Text intents like `buy`, `price`, `มีอะไรบ้าง`, `ราคา` trigger shopping responses.
+- Bot can recommend items and provide concise response text.
 
-## Privacy / DSR
+## 7. Privacy and DSR
 - `POST /privacy/consent`
 - `GET /privacy/consent/:userId`
 - `POST /privacy/dsr`
 - DSR types: `access`, `delete`, `rectify`
 
-## Typical Journey
-1. User asks in LINE.
-2. Bot recommends products.
-3. User adds item to cart.
-4. User creates order and pays.
-5. User can submit privacy requests.
+## 8. Realtime Metrics (Read-only)
+Metrics are visible via admin dashboard and `/ws` stream (`messages`, `orders`, `payments`).
 
-## Troubleshooting
-- Unauthorized: invalid or missing `x-api-key`
-- No products: selected tenant has no products
-- LINE no reply: LINE credential/signature issue
-- Stripe URL null: Stripe is not configured
+## 9. Troubleshooting
+- 401 Unauthorized: invalid `x-api-key`
+- Empty products: no tenant product data
+- No LINE response: credential/signature mismatch
+- Null Stripe URL: Stripe not configured
