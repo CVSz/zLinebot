@@ -8,6 +8,11 @@ type QdrantPoint = {
   id: string | number;
 };
 
+type ProductRow = {
+  id: number;
+  [key: string]: unknown;
+};
+
 export async function recommendVector(tenantId: string, query: string, vectorOverride?: number[]) {
   const vector = vectorOverride ?? (await embed(query));
 
@@ -24,11 +29,11 @@ export async function recommendVector(tenantId: string, query: string, vectorOve
     return [];
   }
 
-  const dbResult = await db.query(
+  const dbResult = await db.query<ProductRow>(
     "SELECT * FROM products WHERE id = ANY($1::int[])",
     [ids]
   );
 
-  const byId = new Map(dbResult.rows.map((row) => [row.id, row]));
+  const byId = new Map(dbResult.rows.map((row: ProductRow) => [row.id, row]));
   return ids.map((id) => byId.get(id)).filter(Boolean);
 }
