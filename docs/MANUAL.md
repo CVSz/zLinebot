@@ -32,3 +32,21 @@ Full-stack mobile deployment installer:
 ```bash
 ./scripts/install_mobile_fullstack_deploy.sh
 ```
+
+Meta full-stack Android application deployment installer:
+
+```bash
+./scripts/install_meta_fullstack_android_app_deploy.sh
+```
+
+Meta full-stack iOS application deployment installer:
+
+```bash
+./scripts/install_meta_fullstack_ios_app_deploy.sh
+```
+
+Meta full-stack mobile application deployment installer:
+
+```bash
+./scripts/install_meta_fullstack_mobile_app_deploy.sh
+```
