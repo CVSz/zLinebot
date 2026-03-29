@@ -1,5 +1,6 @@
 import crypto, { randomUUID } from "crypto";
 import { db } from "../db.js";
+import { collectEvidence } from "../compliance/evidence.js";
 
 type AuditInput = {
   tenantId: string;
@@ -40,4 +41,6 @@ export async function auditLog(input: AuditInput): Promise<void> {
       hash
     ]
   );
+
+  await collectEvidence("SOC2-CC7", { action: input.action, traceId: input.traceId });
 }

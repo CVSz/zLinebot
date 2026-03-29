@@ -1,0 +1,11 @@
+{
+  "standard": "PDPA",
+  "version": "1.0",
+  "requiredSections": [
+    "lawful_basis",
+    "consent_records",
+    "data_subject_requests",
+    "retention_policy",
+    "audit_trail"
+  ]
+}

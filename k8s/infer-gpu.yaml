@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-infer
+spec:
+  template:
+    spec:
+      nodeSelector:
+        accelerator: nvidia
