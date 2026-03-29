@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FLY_REGISTRY: registry.fly.io/zlinebot
 
     steps:
       - uses: actions/checkout@v4
@@ -14,7 +16,14 @@ jobs:
       - name: Build Docker
         run: docker build -t zlinebot .
 
+      - name: Log in to Fly registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.fly.io
+          username: x
+          password: ${{ secrets.FLY_API_TOKEN }}
+
       - name: Push
         run: |
-          docker tag zlinebot registry.fly.io/zlinebot
-          docker push registry.fly.io/zlinebot
+          docker tag zlinebot "$FLY_REGISTRY:latest"
+          docker push "$FLY_REGISTRY:latest"
