@@ -1,7 +1,7 @@
 tunnel: zlinebot
-credentials-file: /etc/cloudflared/credentials.json
+credentials-file: /root/.cloudflared/<id>.json
 
 ingress:
   - hostname: zlinebot.zeaz.dev
-    service: http://nginx:80
+    service: https://zlinebot.fly.dev
   - service: http_status:404
