@@ -3,6 +3,9 @@ set -euo pipefail
 
 echo "🤖 INSTALL ANDROID DEPLOYMENT TOOLCHAIN"
 
+ANDROID_PLATFORM_VERSION="${ANDROID_PLATFORM_VERSION:-35}"
+ANDROID_BUILD_TOOLS_VERSION="${ANDROID_BUILD_TOOLS_VERSION:-35.0.0}"
+
 SUDO=""
 if command -v sudo >/dev/null 2>&1; then
   SUDO="sudo"
@@ -13,6 +16,7 @@ if [[ "$(uname -s)" != "Linux" ]]; then
   exit 1
 fi
 
+# NOTE: Uses apt (Debian/Ubuntu package manager).
 $SUDO apt update
 $SUDO apt install -y curl git unzip zip openjdk-17-jdk ruby-full build-essential
 
@@ -28,9 +32,9 @@ export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android}"
 export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
 
 yes | sdkmanager --licenses >/dev/null
-sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+sdkmanager "platform-tools" "platforms;android-${ANDROID_PLATFORM_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
 
-gem install --no-document fastlane
+$SUDO gem install --no-document fastlane
 
 echo "✅ Android deployment tooling installed"
 echo "👉 Next: set ANDROID_HOME and add cmdline-tools/platform-tools to PATH in your shell profile."

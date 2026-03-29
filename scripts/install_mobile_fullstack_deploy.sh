@@ -9,6 +9,7 @@ if command -v sudo >/dev/null 2>&1; then
 fi
 
 if [[ "$(uname -s)" == "Linux" ]]; then
+  # NOTE: Uses apt (Debian/Ubuntu package manager).
   $SUDO apt update
   $SUDO apt install -y curl git nodejs npm ruby-full build-essential
 elif [[ "$(uname -s)" == "Darwin" ]]; then
@@ -27,8 +28,7 @@ if [ ! -d zLinebot ]; then
   git clone https://github.com/CVSz/zLinebot.git
 fi
 
-cd zLinebot
-npm install --prefix app
+npm install --prefix zLinebot/app
 
 echo "✅ Base full-stack mobile dependencies installed"
 echo "👉 Run platform-specific installer next:"
