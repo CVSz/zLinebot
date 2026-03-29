@@ -47,7 +47,7 @@ webhookRouter.post(
     const rawBody = (req as RawRequest).rawBody ?? JSON.stringify(req.body);
     const hash = crypto.createHmac("sha256", channelSecret).update(rawBody).digest("base64");
 
-    if (hash !== signature) {
+    if (!isValidLineSignature(hash, signature)) {
       return res.status(401).send("invalid signature");
     }
 
@@ -82,7 +82,7 @@ async function handleEvent(event: LineTextMessageEvent, channelAccessToken: stri
       ? replyPayload
       : { type: "text", text: "รองรับข้อความแบบ text ใน LINE ตอนนี้เท่านั้น" };
 
-  await fetch(lineApiReplyEndpoint, {
+  const response = await fetch(lineApiReplyEndpoint, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${channelAccessToken}`,
@@ -93,6 +93,11 @@ async function handleEvent(event: LineTextMessageEvent, channelAccessToken: stri
       messages: [message]
     })
   });
+
+  if (!response.ok) {
+    const responseBody = await response.text();
+    throw new Error(`line reply failed: ${response.status} ${responseBody}`);
+  }
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
@@ -108,4 +113,14 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: 
   }
 
   return result;
+}
+
+function isValidLineSignature(actual: string, provided: string): boolean {
+  const actualBuffer = Buffer.from(actual, "utf8");
+  const providedBuffer = Buffer.from(provided, "utf8");
+  if (actualBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(actualBuffer, providedBuffer);
 }
