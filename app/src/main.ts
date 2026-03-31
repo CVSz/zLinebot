@@ -1,5 +1,8 @@
 import http from "http";
-import express, { type NextFunction, type Request, Router, type Response } from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import express, { Router } from "express";
+import helmet from "helmet";
 import { env } from "./utils/env.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { isAuthorizedTenantKey, readHeader, resolveTenantId, tenant } from "./middleware/tenant.js";
@@ -23,6 +26,9 @@ import { health } from "./health.js";
 import { configureDQN } from "./rl/dqn.js";
 import { initializeRewardSystem } from "./rl/reward.js";
 import { initializeMultiAgentRewardSystem } from "./rl/multi-agent-reward.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -30,6 +36,8 @@ initializeRewardSystem();
 initializeMultiAgentRewardSystem();
 configureDQN({ stateDim: 256 });
 
+app.use(helmet());
+app.use(cors());
 app.use(trace);
 app.use(rateLimit);
 
@@ -56,13 +64,10 @@ tenantRouter.use(dsrRouter);
 tenantRouter.use(auditRouter);
 app.use("/", tenantRouter);
 
-app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  // eslint-disable-next-line no-console
-  console.error("unhandled error", error);
-  res.status(500).json({ error: "Internal server error" });
-});
+app.use(errorHandler);
 
 const server = http.createServer(app);
+let shuttingDown = false;
 
 startAggregator();
 
@@ -86,3 +91,24 @@ server.listen(env.port, () => {
   // eslint-disable-next-line no-console
   console.log(`app listening on ${env.port}`);
 });
+
+function shutdown(signal: NodeJS.Signals): void {
+  if (shuttingDown) {
+    return;
+  }
+
+  shuttingDown = true;
+  // eslint-disable-next-line no-console
+  console.log(`${signal} received, shutting down gracefully`);
+
+  server.close(() => {
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    process.exit(1);
+  }, 10_000).unref();
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
