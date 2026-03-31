@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import express, { Router } from "express";
+import type { LineReplyMessage } from "./handler.js";
 import { handleMessage } from "./handler.js";
 
 type LineTextMessageEvent = {
@@ -71,16 +72,11 @@ async function handleEvent(event: LineTextMessageEvent, channelAccessToken: stri
   const tenantId = "demo";
   const userId = event.source?.userId ?? "anonymous";
 
-  const replyPayload = await withTimeout(
+  const messages = await withTimeout<LineReplyMessage[]>(
     handleMessage(event.message.text, tenantId, userId),
-    700,
-    { type: "text", text: "ระบบกำลังประมวลผลอยู่ กรุณาลองใหม่อีกครั้งครับ" }
+    800,
+    [{ type: "text", text: "ระบบกำลังประมวลผลอยู่ กรุณาลองใหม่อีกครั้งครับ" }]
   );
-
-  const message =
-    replyPayload.type === "text"
-      ? replyPayload
-      : { type: "text", text: "รองรับข้อความแบบ text ใน LINE ตอนนี้เท่านั้น" };
 
   const response = await fetch(lineApiReplyEndpoint, {
     method: "POST",
@@ -90,7 +86,7 @@ async function handleEvent(event: LineTextMessageEvent, channelAccessToken: stri
     },
     body: JSON.stringify({
       replyToken: event.replyToken,
-      messages: [message]
+      messages: messages.slice(0, 5)
     })
   });
 
