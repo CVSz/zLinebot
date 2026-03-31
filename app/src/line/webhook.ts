@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import express, { Router } from "express";
 import type { LineReplyMessage } from "./handler.js";
-import { handleMessage } from "./handler.js";
+import { handleMessage, handlePostback } from "./handler.js";
 
 type LineTextMessageEvent = {
   type: "message";
@@ -13,8 +13,17 @@ type LineTextMessageEvent = {
   };
 };
 
+type LinePostbackEvent = {
+  type: "postback";
+  replyToken: string;
+  source?: { userId?: string };
+  postback: { data: string };
+};
+
+type LineWebhookEvent = LineTextMessageEvent | LinePostbackEvent;
+
 type LineWebhookBody = {
-  events?: LineTextMessageEvent[];
+  events?: LineWebhookEvent[];
 };
 
 type RawRequest = {
@@ -22,11 +31,12 @@ type RawRequest = {
 };
 
 const lineApiReplyEndpoint = "https://api.line.me/v2/bot/message/reply";
+const defaultTimeoutReply: LineReplyMessage[] = [{ type: "text", text: "System is processing your request. Please retry shortly." }];
 
 export const webhookRouter = Router();
 
 webhookRouter.post(
-  "/webhook",
+  "/line",
   express.json({
     verify: (req, _res, buf) => {
       (req as RawRequest).rawBody = buf.toString("utf8");
@@ -64,20 +74,31 @@ webhookRouter.post(
   }
 );
 
-async function handleEvent(event: LineTextMessageEvent, channelAccessToken: string) {
-  if (event.type !== "message" || event.message.type !== "text") {
+async function handleEvent(event: LineWebhookEvent, channelAccessToken: string) {
+  const tenantId = process.env.LINE_DEFAULT_TENANT_ID ?? "demo";
+  const userId = event.source?.userId ?? "anonymous";
+
+  if (event.type === "message" && event.message.type === "text") {
+    const messages = await withTimeout<LineReplyMessage[]>(
+      handleMessage(event.message.text, tenantId, userId),
+      800,
+      defaultTimeoutReply
+    );
+    await sendReply(event.replyToken, messages, channelAccessToken);
     return;
   }
 
-  const tenantId = "demo";
-  const userId = event.source?.userId ?? "anonymous";
+  if (event.type === "postback") {
+    const messages = await withTimeout<LineReplyMessage[]>(
+      handlePostback(event.postback.data, tenantId, userId),
+      800,
+      defaultTimeoutReply
+    );
+    await sendReply(event.replyToken, messages, channelAccessToken);
+  }
+}
 
-  const messages = await withTimeout<LineReplyMessage[]>(
-    handleMessage(event.message.text, tenantId, userId),
-    800,
-    [{ type: "text", text: "ระบบกำลังประมวลผลอยู่ กรุณาลองใหม่อีกครั้งครับ" }]
-  );
-
+async function sendReply(replyToken: string, messages: LineReplyMessage[], channelAccessToken: string): Promise<void> {
   const response = await fetch(lineApiReplyEndpoint, {
     method: "POST",
     headers: {
@@ -85,7 +106,7 @@ async function handleEvent(event: LineTextMessageEvent, channelAccessToken: stri
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      replyToken: event.replyToken,
+      replyToken,
       messages: messages.slice(0, 5)
     })
   });

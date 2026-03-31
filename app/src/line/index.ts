@@ -1,3 +1,10 @@
 export { webhookRouter } from "./webhook.js";
-export { handleMessage, type LineReplyMessage } from "./handler.js";
-export { agentActionText, productFlex, recommendationFlex, textMessage } from "./flex.js";
+export { handleMessage, handlePostback, type LineReplyMessage } from "./handler.js";
+export {
+  buildAgentActionFlex,
+  buildRecommendationFlex,
+  agentActionText,
+  productFlex,
+  recommendationFlex,
+  textMessage
+} from "./flex.js";
