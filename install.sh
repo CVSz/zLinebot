@@ -1,40 +1,47 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# zLinebot Full Install Script (Ubuntu 24.04)
+# Version: 2026.04.01 (Fixed)
+# ==============================================================================
 set -euo pipefail
 
-echo "🚀 ZLINEBOT FULL INSTALL (Ubuntu 24.04)"
+echo "=== zLinebot Full Install (Ubuntu 24.04) ==="
 
-# --- system deps ---
-sudo apt update
-sudo apt install -y docker.io docker-compose git curl
+# System dependencies
+sudo apt-get update -qq
+sudo apt-get install -y docker.io docker-compose-v2 git curl
 
-sudo systemctl enable docker
-sudo systemctl start docker
+sudo systemctl enable --now docker
 
-# --- cloudflared ---
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cf.deb
-sudo dpkg -i cf.deb
+# Cloudflared
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb \
+  -o /tmp/cloudflared.deb
+sudo dpkg -i /tmp/cloudflared.deb
 
-# --- clone ---
-if [ ! -d zLinebot ]; then
+# Clone repository (if not present)
+if [[ ! -d zLinebot ]]; then
   git clone https://github.com/CVSz/zLinebot.git
 fi
-
 cd zLinebot
 
-# --- env ---
-if [ -f .env.example ] && [ ! -f .env ]; then
+# Environment file
+if [[ -f .env.example && ! -f .env ]]; then
   cp .env.example .env
+  echo "[INFO] .env created from template – please edit before running docker compose"
 fi
 
-# --- ollama ---
+# Optional: Pull Ollama model (non-blocking)
 docker run -d --name ollama -p 11434:11434 ollama/ollama || true
 docker exec ollama ollama pull mistral || true
 
-# --- run stack ---
+# Start full stack
 docker compose up -d --build
 
-echo "✅ DONE"
-echo "👉 Configure cloudflared:"
-echo "cloudflared tunnel login"
-echo "cloudflared tunnel create zlinebot"
-echo "cloudflared tunnel run zlinebot"
+echo "============================================================================"
+echo "SUCCESS: zLinebot is now running."
+echo "Next steps:"
+echo "   1. Edit .env with your keys and tenant settings"
+echo "   2. cloudflared tunnel login"
+echo "   3. cloudflared tunnel create zlinebot"
+echo "   4. cloudflared tunnel run zlinebot"
+echo "============================================================================"

@@ -4,7 +4,7 @@
 # Target: https://github.com/CVSz/zLinebot/discussions
 # Purpose: Enable Discussions + provide clear manual setup instructions.
 #          Note: GitHub CLI does not yet support creating discussions or categories.
-# Version: 2026.04.01
+# Version: 2026.04.01 (Fixed)
 # License: MIT
 # ==============================================================================
 set -euo pipefail
@@ -50,7 +50,7 @@ echo "[INFO] Discussions feature enabled (or already active) for ${FULL_REPO}"
 # ==============================================================================
 echo "=== [3/4] Discussion Categories (Manual Setup Required) ==="
 
-cat <<'EOF'
+cat <<'EOF_CAT'
 [IMPORTANT] GitHub does not currently provide a public API or gh CLI command to create Discussion categories.
 
 Please create the following 12 categories manually:
@@ -71,23 +71,23 @@ Please create the following 12 categories manually:
 How to create:
    1. Go to: https://github.com/CVSz/zLinebot/settings/discussions
    2. Under "Discussion categories", click "New category" for each item.
-   3. Set the emoji, name, description (optional but recommended), and "Answerable" flag as shown above.
+   3. Set the emoji, name, description (optional but recommended), and "Answerable" flag exactly as shown above.
 
-EOF
+EOF_CAT
 
 # ==============================================================================
 # [4/4] Welcome Discussion – Manual Creation Recommended
 # ==============================================================================
 echo "=== [4/4] Welcome Discussion ==="
 
-cat <<'EOF'
+cat <<'EOF_WELCOME'
 The GitHub CLI does not yet support creating discussions (`gh discussion create` is unavailable).
 
 Please create the welcome discussion manually (one-time action):
 
 1. Go to: https://github.com/CVSz/zLinebot/discussions
 2. Click "New discussion"
-3. Select category: **📢 Announcements**
+3. Select category: 📢 Announcements
 4. Use the following title and body:
 
 Title:
@@ -109,7 +109,7 @@ This setup is managed by `scripts/configure_discussions.sh` (version ${SCRIPT_VE
 
 Where to report security issues: [SECURITY.md](../SECURITY.md).
 
-EOF
+EOF_WELCOME
 
 echo "============================================================================"
 echo "SUCCESS: zLinebot Discussions feature has been enabled."
