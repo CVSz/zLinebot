@@ -1,8 +1,8 @@
 import http from "http";
-import express from "express";
+import express, { type NextFunction, type Request, Router, type Response } from "express";
 import { env } from "./utils/env.js";
 import { rateLimit } from "./middleware/rateLimit.js";
-import { tenant } from "./middleware/tenant.js";
+import { isAuthorizedTenantKey, readHeader, resolveTenantId, tenant } from "./middleware/tenant.js";
 import { setTenantSchema } from "./middleware/schema.js";
 import { productsRouter } from "./routes/products.js";
 import { cartRouter } from "./routes/cart.js";
@@ -23,25 +23,37 @@ import { health } from "./health.js";
 
 const app = express();
 
-app.use("/webhook", stripeWebhookRouter);
-
 app.use(trace);
 app.use(rateLimit);
 
+const webhookRouterCombined = Router();
+webhookRouterCombined.use(stripeWebhookRouter);
+webhookRouterCombined.use(promptpayWebhookRouter);
+app.use("/webhook", webhookRouterCombined);
 app.use("/", webhookRouter);
-app.use(express.json());
+
+app.use(express.json({ limit: "10mb" }));
 
 app.get("/health", health);
 
-app.use("/webhook", promptpayWebhookRouter);
-app.use("/", tenant, setTenantSchema, productsRouter);
-app.use("/", tenant, setTenantSchema, cartRouter);
-app.use("/", tenant, setTenantSchema, ordersRouter);
-app.use("/", tenant, setTenantSchema, adminRouter);
-app.use("/", tenant, setTenantSchema, adminBillingRouter);
 app.use("/", feedbackRouter);
-app.use("/", tenant, setTenantSchema, dsrRouter);
-app.use("/", tenant, setTenantSchema, auditRouter);
+
+const tenantRouter = Router();
+tenantRouter.use(tenant, setTenantSchema);
+tenantRouter.use(productsRouter);
+tenantRouter.use(cartRouter);
+tenantRouter.use(ordersRouter);
+tenantRouter.use(adminRouter);
+tenantRouter.use(adminBillingRouter);
+tenantRouter.use(dsrRouter);
+tenantRouter.use(auditRouter);
+app.use("/", tenantRouter);
+
+app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  // eslint-disable-next-line no-console
+  console.error("unhandled error", error);
+  res.status(500).json({ error: "Internal server error" });
+});
 
 const server = http.createServer(app);
 
@@ -55,8 +67,12 @@ if ((process.env.FEATURE_SYNC_ENABLED ?? "false") === "true") {
 }
 
 startWS(server, (req) => {
-  const hostTenant = req.headers["x-tenant-id"];
-  return Array.isArray(hostTenant) ? hostTenant[0] : hostTenant;
+  const apiKey = readHeader(req.headers["x-api-key"]);
+  if (!isAuthorizedTenantKey(apiKey)) {
+    return undefined;
+  }
+
+  return resolveTenantId(readHeader(req.headers["x-tenant-id"]));
 });
 
 server.listen(env.port, () => {

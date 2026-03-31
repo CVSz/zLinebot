@@ -115,12 +115,17 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: 
   return result;
 }
 
-function isValidLineSignature(actual: string, provided: string): boolean {
-  const actualBuffer = Buffer.from(actual, "utf8");
-  const providedBuffer = Buffer.from(provided, "utf8");
-  if (actualBuffer.length !== providedBuffer.length) {
+function isValidLineSignature(computedHash: string, signature: string): boolean {
+  try {
+    const computedBuffer = Buffer.from(computedHash, "base64");
+    const signatureBuffer = Buffer.from(signature, "base64");
+
+    if (computedBuffer.length !== signatureBuffer.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(computedBuffer, signatureBuffer);
+  } catch {
     return false;
   }
-
-  return crypto.timingSafeEqual(actualBuffer, providedBuffer);
 }
