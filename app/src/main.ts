@@ -30,7 +30,7 @@ const webhookRouterCombined = Router();
 webhookRouterCombined.use(stripeWebhookRouter);
 webhookRouterCombined.use(promptpayWebhookRouter);
 app.use("/webhook", webhookRouterCombined);
-app.use("/", webhookRouter);
+app.use("/webhook", webhookRouter);
 
 app.use(express.json({ limit: "10mb" }));
 

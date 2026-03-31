@@ -49,7 +49,7 @@ export function productFlex(products: Product[]): FlexMessage {
   };
 }
 
-export function recommendationFlex(recommendations: Recommendation[]): FlexMessage {
+export function buildRecommendationFlex(recommendations: Recommendation[]): FlexMessage {
   return {
     type: "flex",
     altText: "AI recommendations",
@@ -70,6 +70,33 @@ export function recommendationFlex(recommendations: Recommendation[]): FlexMessa
       }
     }
   };
+}
+
+export function buildAgentActionFlex(action: AgentAction): FlexMessage {
+  const decisionText = action.reject
+    ? "Autonomous pricing paused by safety guardrails"
+    : `${Math.round(action.discount * 100)}% discount${action.pick ? ` for ${action.pick}` : ""}`;
+
+  return {
+    type: "flex",
+    altText: "Agent action",
+    contents: {
+      type: "bubble",
+      body: {
+        type: "box",
+        layout: "vertical",
+        spacing: "sm",
+        contents: [
+          { type: "text", text: "Agent decision", weight: "bold", size: "md" },
+          { type: "text", text: decisionText, wrap: true, size: "sm" }
+        ]
+      }
+    }
+  };
+}
+
+export function recommendationFlex(recommendations: Recommendation[]): FlexMessage {
+  return buildRecommendationFlex(recommendations);
 }
 
 export function agentActionText(action: AgentAction): { type: "text"; text: string } {
