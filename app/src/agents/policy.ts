@@ -1,4 +1,4 @@
-import { rankRL } from "../services/rl.js";
+import { getRLAction } from "../rl/policy.js";
 import { selectContextual } from "../services/bandit.contextual.js";
 import { choose } from "../services/econ.js";
 
@@ -29,16 +29,20 @@ export type AgentState = {
 };
 
 export async function decide(state: AgentState): Promise<AgentAction> {
-  const items = state.candidates;
-  const rlPick = await rankRL(state.vector, items);
   const banditPick = await selectContextual(
     state.tenantId,
-    items.map((i) => ({ id: i.id, x: i.x }))
+    state.candidates.map((item) => ({ id: item.id, x: item.x }))
   );
 
+  const rlAction = await getRLAction(state);
+
   const actions: AgentAction[] = [
-    { type: "rank", pick: rlPick, discount: 0 },
-    { type: "rank", pick: banditPick, discount: 0.1 }
+    rlAction,
+    {
+      type: "rank",
+      pick: banditPick,
+      discount: 0.1
+    }
   ];
 
   return choose(actions, (action) => state.evaluate(action));

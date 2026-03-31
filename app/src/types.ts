@@ -15,3 +15,10 @@ declare module "express-serve-static-core" {
     tenant?: TenantContext;
   }
 }
+
+export type RecommendationCandidate = {
+  id: string;
+  features: number[];
+  [key: string]: unknown;
+};
+
