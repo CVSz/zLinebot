@@ -66,7 +66,7 @@ const server = http.createServer(app);
 
 startAggregator();
 
-if ((process.env.FEATURE_SYNC_ENABLED ?? "false") === "true") {
+if (env.featureSyncEnabled) {
   startFeatureSyncConsumer().catch((error: unknown) => {
     // eslint-disable-next-line no-console
     console.error("failed to start feature sync consumer", error);

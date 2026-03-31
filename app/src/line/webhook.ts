@@ -2,6 +2,7 @@ import crypto from "crypto";
 import express, { Router } from "express";
 import type { LineReplyMessage } from "./handler.js";
 import { handleMessage, handlePostback } from "./handler.js";
+import { env } from "../utils/env.js";
 
 type LineTextMessageEvent = {
   type: "message";
@@ -43,20 +44,18 @@ webhookRouter.post(
     }
   }),
   async (req, res) => {
-    const channelSecret = process.env.LINE_CHANNEL_SECRET;
-    const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-    const signature = req.header("x-line-signature");
-
-    if (!channelSecret || !channelAccessToken) {
+    if (!env.lineChannelSecret || !env.lineChannelAccessToken) {
       return res.status(500).json({ error: "line credentials are not configured" });
     }
+
+    const signature = req.header("x-line-signature");
 
     if (!signature) {
       return res.status(401).send("missing signature");
     }
 
     const rawBody = (req as RawRequest).rawBody ?? JSON.stringify(req.body);
-    const hash = crypto.createHmac("sha256", channelSecret).update(rawBody).digest("base64");
+    const hash = crypto.createHmac("sha256", env.lineChannelSecret).update(rawBody).digest("base64");
 
     if (!isValidLineSignature(hash, signature)) {
       return res.status(401).send("invalid signature");
@@ -67,7 +66,7 @@ webhookRouter.post(
 
     res.sendStatus(200);
 
-    void Promise.all(events.map((event) => handleEvent(event, channelAccessToken))).catch((error) => {
+    void Promise.all(events.map((event) => handleEvent(event, env.lineChannelAccessToken))).catch((error) => {
       // eslint-disable-next-line no-console
       console.error("line webhook processing failed", error);
     });
@@ -75,7 +74,7 @@ webhookRouter.post(
 );
 
 async function handleEvent(event: LineWebhookEvent, channelAccessToken: string) {
-  const tenantId = process.env.LINE_DEFAULT_TENANT_ID ?? "demo";
+  const tenantId = env.lineDefaultTenantId;
   const userId = event.source?.userId ?? "anonymous";
 
   if (event.type === "message" && event.message.type === "text") {
