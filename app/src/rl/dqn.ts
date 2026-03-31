@@ -1,7 +1,7 @@
 import type { AgentAction, AgentState } from "../agents/policy.js";
 import { clamp } from "./utils.js";
 
-export type DqnAction = "hold" | "discount_10" | "discount_20" | "reject";
+export type DqnAction = "hold" | "discount" | "bundle" | "upsell" | "reject" | "escalate";
 
 export type Transition = {
   state: number[];
@@ -9,6 +9,7 @@ export type Transition = {
   reward: number;
   nextState: number[];
   done: boolean;
+  priority?: number;
 };
 
 export type DqnConfig = {
@@ -22,9 +23,10 @@ export type DqnConfig = {
   replayBufferSize?: number;
   batchSize?: number;
   tau?: number;
+  targetUpdateInterval?: number;
 };
 
-const DEFAULT_ACTION_SPACE: DqnAction[] = ["hold", "discount_10", "discount_20", "reject"];
+const DEFAULT_ACTION_SPACE: DqnAction[] = ["discount", "bundle", "hold", "upsell", "reject", "escalate"];
 
 function randomMatrix(rows: number, cols: number): number[][] {
   return Array.from({ length: rows }, () =>
@@ -60,20 +62,36 @@ function maxIndex(values: number[]): number {
   return best;
 }
 
-function sampleBatch<T>(items: T[], size: number): T[] {
+function samplePrioritizedBatch(items: Transition[], size: number): Transition[] {
   if (items.length <= size) {
     return [...items];
   }
 
-  const result: T[] = [];
+  const totalPriority = items.reduce((sum, item) => sum + Math.max(item.priority ?? 1, 1e-6), 0);
+  const result: Transition[] = [];
+
   for (let i = 0; i < size; i += 1) {
-    const index = Math.floor(Math.random() * items.length);
-    result.push(items[index]);
+    const threshold = Math.random() * totalPriority;
+    let cumulative = 0;
+
+    for (const item of items) {
+      cumulative += Math.max(item.priority ?? 1, 1e-6);
+      if (cumulative >= threshold) {
+        result.push(item);
+        break;
+      }
+    }
   }
+
   return result;
 }
 
 export function encodeState(state: AgentState): number[] {
+  const vector = state.vector.slice(0, 252);
+  while (vector.length < 252) {
+    vector.push(0);
+  }
+
   const candidateCount = state.candidates.length;
   const actionRate = state.actionsLastMin;
   const baselineAction: AgentAction = {
@@ -81,10 +99,9 @@ export function encodeState(state: AgentState): number[] {
     pick: state.candidates[0]?.id ?? null,
     discount: 0
   };
-
   const margin = state.marginAfter(baselineAction);
 
-  return [...state.vector, candidateCount, actionRate, margin];
+  return [...vector, candidateCount, actionRate, margin, Number(state.tenantId.length > 0)];
 }
 
 export class DQN {
@@ -98,8 +115,10 @@ export class DQN {
   private readonly replayBufferSize: number;
   private readonly batchSize: number;
   private readonly tau: number;
+  private readonly targetUpdateInterval: number;
 
   private epsilon: number;
+  private stepCount = 0;
   private replayBuffer: Transition[] = [];
   private onlineWeights: number[][];
   private targetWeights: number[][];
@@ -113,9 +132,10 @@ export class DQN {
     this.epsilon = config.epsilonStart ?? 1;
     this.epsilonMin = config.epsilonMin ?? 0.05;
     this.epsilonDecay = config.epsilonDecay ?? 0.995;
-    this.replayBufferSize = config.replayBufferSize ?? 20_000;
+    this.replayBufferSize = config.replayBufferSize ?? 50_000;
     this.batchSize = config.batchSize ?? 64;
-    this.tau = config.tau ?? 0.01;
+    this.tau = config.tau ?? 0.005;
+    this.targetUpdateInterval = config.targetUpdateInterval ?? 100;
 
     this.onlineWeights = randomMatrix(this.stateDim, this.actionCount);
     this.targetWeights = this.onlineWeights.map((row) => [...row]);
@@ -135,18 +155,20 @@ export class DQN {
   }
 
   public storeTransition(transition: Transition): void {
-    this.replayBuffer.push(transition);
+    const priority = Math.max(Math.abs(transition.reward), 1e-6);
+    this.replayBuffer.push({ ...transition, priority });
     if (this.replayBuffer.length > this.replayBufferSize) {
       this.replayBuffer.shift();
     }
   }
 
-  public trainStep(): boolean {
+  public trainStep(): number | null {
     if (this.replayBuffer.length < this.batchSize) {
-      return false;
+      return null;
     }
 
-    const batch = sampleBatch(this.replayBuffer, this.batchSize);
+    const batch = samplePrioritizedBatch(this.replayBuffer, this.batchSize);
+    let absoluteTdError = 0;
 
     for (const transition of batch) {
       const qOnline = dot(this.onlineWeights, transition.state);
@@ -157,15 +179,23 @@ export class DQN {
       const target = transition.reward + (transition.done ? 0 : this.gamma * (qNextTarget[bestNextAction] ?? 0));
       const prediction = qOnline[transition.action] ?? 0;
       const tdError = target - prediction;
+      absoluteTdError += Math.abs(tdError);
 
       for (let i = 0; i < this.stateDim; i += 1) {
         this.onlineWeights[i][transition.action] += this.learningRate * tdError * (transition.state[i] ?? 0);
       }
+
+      transition.priority = Math.max(Math.abs(tdError), 1e-6);
     }
 
     this.epsilon = clamp(this.epsilon * this.epsilonDecay, this.epsilonMin, 1);
-    this.softUpdateTarget();
-    return true;
+    this.stepCount += 1;
+
+    if (this.stepCount % this.targetUpdateInterval === 0) {
+      this.softUpdateTarget();
+    }
+
+    return absoluteTdError / batch.length;
   }
 
   public toAgentAction(state: AgentState): AgentAction {
@@ -175,12 +205,16 @@ export class DQN {
     const pick = state.candidates[0]?.id ?? null;
 
     switch (action) {
-      case "discount_10":
+      case "discount":
+        return { type: "rank", pick, discount: 0.15 };
+      case "bundle":
         return { type: "rank", pick, discount: 0.1 };
-      case "discount_20":
-        return { type: "rank", pick, discount: 0.2 };
+      case "upsell":
+        return { type: "rank", pick, discount: 0.05 };
       case "reject":
         return { type: "rank", pick: null, discount: 0, reject: true };
+      case "escalate":
+        return { type: "rank", pick: null, discount: 0 };
       case "hold":
       default:
         return { type: "rank", pick, discount: 0 };
@@ -196,4 +230,17 @@ export class DQN {
       }
     }
   }
+}
+
+let dqnInstance: DQN | null = null;
+
+export function configureDQN(config: DqnConfig): DQN {
+  if (!dqnInstance) {
+    dqnInstance = new DQN(config);
+  }
+  return dqnInstance;
+}
+
+export function getDQN(): DQN | null {
+  return dqnInstance;
 }
