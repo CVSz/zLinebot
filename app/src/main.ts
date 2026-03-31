@@ -20,8 +20,13 @@ import { trace } from "./middleware/trace.js";
 import { dsrRouter } from "./routes/dsr.js";
 import { auditRouter } from "./routes/audit.js";
 import { health } from "./health.js";
+import { configureDQN } from "./rl/dqn.js";
+import { initializeRewardSystem } from "./rl/reward.js";
 
 const app = express();
+
+initializeRewardSystem();
+configureDQN({ stateDim: 256 });
 
 app.use(trace);
 app.use(rateLimit);

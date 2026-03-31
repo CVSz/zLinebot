@@ -3,6 +3,8 @@ import { guard } from "./guardrails.js";
 import { shouldHalt, type KPI } from "./killswitch.js";
 import { decide, type AgentAction, type AgentState } from "./policy.js";
 import { readState } from "./sensors.js";
+import { getRLAction, observeTransition } from "../rl/policy.js";
+import { computeReward } from "../rl/reward.js";
 
 export type TickResult = {
   state: AgentState;
@@ -29,9 +31,14 @@ export async function tick(kpi?: KPI): Promise<TickResult> {
       };
     }
 
-    const proposal = await decide(state);
-    const safeProposal = guard(state, proposal);
+    await decide(state);
+    const rlProposal = await getRLAction(state);
+    const safeProposal = guard(state, rlProposal);
     const result = await act(safeProposal);
+
+    const nextState = await readState();
+    const reward = computeReward(state, safeProposal);
+    observeTransition(state, safeProposal, reward, nextState, !result.applied);
 
     return { state, proposal: safeProposal, result };
   } catch (error) {
