@@ -22,10 +22,12 @@ import { auditRouter } from "./routes/audit.js";
 import { health } from "./health.js";
 import { configureDQN } from "./rl/dqn.js";
 import { initializeRewardSystem } from "./rl/reward.js";
+import { initializeMultiAgentRewardSystem } from "./rl/multi-agent-reward.js";
 
 const app = express();
 
 initializeRewardSystem();
+initializeMultiAgentRewardSystem();
 configureDQN({ stateDim: 256 });
 
 app.use(trace);

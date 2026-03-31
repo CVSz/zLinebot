@@ -25,3 +25,12 @@ export async function step(
   await deps.train({ state, action, reward });
   return reward;
 }
+
+
+export function marginAfterGlobal(actions: Record<string, AgentAction>): number {
+  return Object.values(actions).reduce((sum, action) => {
+    const revenue = Number((action as { revenue?: number }).revenue ?? 0);
+    const cost = Number((action as { cost?: number }).cost ?? 0);
+    return sum + (revenue - cost);
+  }, 0);
+}

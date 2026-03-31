@@ -3,5 +3,6 @@ export { createStaticEnvironment, type EpisodeStep, type RLEnvironment } from ".
 export { getRLAction, hasDQN, observeTransition, update, type PolicyEvent, type TrainablePolicy } from "./policy.js";
 export { selectAction, snapshotQTable, updateQTable } from "./qlearning.js";
 export { computeReward, initializeRewardSystem, setRewardConfig, type RewardConfig } from "./reward.js";
+export { computeCoordinatedReward, initializeMultiAgentRewardSystem, setMultiAgentRewardConfig, type CoordinatedReward, type MultiAgentRewardConfig, type AgentReward } from "./multi-agent-reward.js";
 export { trainEpisode } from "./train.js";
 export { argMax, clamp, epsilonGreedy } from "./utils.js";

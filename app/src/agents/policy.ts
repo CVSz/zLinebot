@@ -20,6 +20,7 @@ export type AgentState = {
   candidates: CandidateItem[];
   actionsLastMin: number;
   marginAfter: (action: AgentAction) => number;
+  marginAfterGlobal?: (actions: Record<string, AgentAction>) => number;
   evaluate: (action: AgentAction) => {
     revenue: number;
     retention: number;

@@ -4,12 +4,13 @@ import { shouldHalt, type KPI } from "./killswitch.js";
 import { decide, type AgentAction, type AgentState } from "./policy.js";
 import { readState } from "./sensors.js";
 import { getRLAction, observeTransition } from "../rl/policy.js";
-import { computeReward } from "../rl/reward.js";
+import { computeCoordinatedReward, type CoordinatedReward } from "../rl/multi-agent-reward.js";
 
 export type TickResult = {
   state: AgentState;
   proposal: AgentAction;
   result: ActionResult;
+  coordinatedReward?: CoordinatedReward;
 };
 
 export async function tick(kpi?: KPI): Promise<TickResult> {
@@ -31,16 +32,21 @@ export async function tick(kpi?: KPI): Promise<TickResult> {
       };
     }
 
-    await decide(state);
+    const policyProposal = await decide(state);
     const rlProposal = await getRLAction(state);
     const safeProposal = guard(state, rlProposal);
+    const proposals: Record<string, AgentAction> = {
+      policy: policyProposal,
+      rl: safeProposal
+    };
+
     const result = await act(safeProposal);
 
     const nextState = await readState();
-    const reward = computeReward(state, safeProposal);
-    observeTransition(state, safeProposal, reward, nextState, !result.applied);
+    const coordinated = computeCoordinatedReward(state, proposals);
+    observeTransition(state, safeProposal, coordinated.globalReward, nextState, !result.applied);
 
-    return { state, proposal: safeProposal, result };
+    return { state, proposal: safeProposal, result, coordinatedReward: coordinated };
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("[agents] tick failed", error);
