@@ -10,6 +10,20 @@ export type LineReplyMessage = LineTextMessage | LineFlexMessage;
 
 const commerceIntentPattern = /(recommend|แนะนำ|suggest|deal|โปร|buy|price|discount|cart|checkout)/i;
 
+async function emitCoordinatedRewardEvent(tenantId: string, userId: string, tickResult: Awaited<ReturnType<typeof tick>> | null): Promise<void> {
+  if (!tickResult?.coordinatedReward) {
+    return;
+  }
+
+  await emitEvent({
+    type: "message",
+    tenantId,
+    userId,
+    ts: Date.now(),
+    payload: tickResult.coordinatedReward
+  });
+}
+
 export async function handleMessage(text: string, tenantId: string, userId: string): Promise<LineReplyMessage[]> {
   await emitEvent({ type: "message", tenantId, userId, ts: Date.now() });
 
@@ -38,6 +52,8 @@ export async function handleMessage(text: string, tenantId: string, userId: stri
     messages.push(buildAgentActionFlex(tickResult.proposal));
   }
 
+  await emitCoordinatedRewardEvent(tenantId, userId, tickResult);
+
   return messages;
 }
 
@@ -58,6 +74,8 @@ export async function handlePostback(data: string, tenantId: string, userId: str
   if (tickResult?.proposal) {
     messages.push(buildAgentActionFlex(tickResult.proposal));
   }
+
+  await emitCoordinatedRewardEvent(tenantId, userId, tickResult);
 
   return messages;
 }

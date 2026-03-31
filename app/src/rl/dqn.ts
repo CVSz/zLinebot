@@ -1,4 +1,5 @@
 import type { AgentAction, AgentState } from "../agents/policy.js";
+import type { CoordinatedReward } from "./multi-agent-reward.js";
 import { clamp } from "./utils.js";
 
 export type DqnAction = "hold" | "discount" | "bundle" | "upsell" | "reject" | "escalate";
@@ -10,6 +11,7 @@ export type Transition = {
   nextState: number[];
   done: boolean;
   priority?: number;
+  agentContributions?: Record<string, number>;
 };
 
 export type DqnConfig = {
@@ -154,9 +156,22 @@ export class DQN {
     return maxIndex(qValues);
   }
 
-  public storeTransition(transition: Transition): void {
-    const priority = Math.max(Math.abs(transition.reward), 1e-6);
-    this.replayBuffer.push({ ...transition, priority });
+  public storeTransition(transition: Omit<Transition, "reward" | "agentContributions"> & { reward: number | CoordinatedReward }): void {
+    const normalizedReward =
+      typeof transition.reward === "number" ? transition.reward : transition.reward.globalReward;
+    const agentContributions =
+      typeof transition.reward === "number"
+        ? undefined
+        : Object.fromEntries(transition.reward.agentRewards.map((entry) => [entry.agentId, entry.globalContribution]));
+
+    const storedTransition: Transition = {
+      ...transition,
+      reward: normalizedReward,
+      agentContributions
+    };
+
+    const priority = Math.max(Math.abs(storedTransition.reward), 1e-6);
+    this.replayBuffer.push({ ...storedTransition, priority });
     if (this.replayBuffer.length > this.replayBufferSize) {
       this.replayBuffer.shift();
     }
