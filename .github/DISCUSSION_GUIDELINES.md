@@ -53,3 +53,13 @@ When editing the pinned welcome post, include:
 ---
 
 If category structure changes, update this file in the same pull request so community guidance stays synchronized.
+
+## Automation
+
+Repository maintainers can apply the discussion configuration idempotently with:
+
+```bash
+./scripts/configure_discussions.sh
+```
+
+The script enables Discussions, creates/updates categories, and seeds the welcome thread if it does not exist.
