@@ -1,3 +1,6 @@
+import type { AgentAction, AgentState } from "../agents/policy.js";
+import { selectAction } from "./qlearning.js";
+
 export type PolicyEvent<TState, TAction> = {
   state: TState;
   action: TAction;
@@ -24,5 +27,20 @@ export async function update<TState, TAction>(
       action: event.action,
       grad: w * adv
     });
+  }
+}
+
+export async function getRLAction(state: AgentState): Promise<AgentAction> {
+  try {
+    return await selectAction(state);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("[rl] policy fallback", error);
+    return {
+      type: "rank",
+      pick: state.candidates[0]?.id ?? null,
+      discount: 0,
+      reject: false
+    };
   }
 }

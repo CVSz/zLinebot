@@ -1,6 +1,6 @@
 import { act, type ActionResult } from "./actuators.js";
 import { guard } from "./guardrails.js";
-import { shouldHalt } from "./killswitch.js";
+import { shouldHalt, type KPI } from "./killswitch.js";
 import { decide, type AgentAction, type AgentState } from "./policy.js";
 import { readState } from "./sensors.js";
 
@@ -10,11 +10,12 @@ export type TickResult = {
   result: ActionResult;
 };
 
-export async function tick(): Promise<TickResult> {
+export async function tick(kpi?: KPI): Promise<TickResult> {
   try {
     const state = await readState();
-    if (shouldHalt({ revenueDropPct: 0, errorRate: 0 })) {
-      const haltedProposal: AgentAction = {
+
+    if (kpi && shouldHalt(kpi)) {
+      const blockedAction: AgentAction = {
         type: "rank",
         pick: null,
         discount: 0,
@@ -23,7 +24,7 @@ export async function tick(): Promise<TickResult> {
 
       return {
         state,
-        proposal: haltedProposal,
+        proposal: blockedAction,
         result: { applied: false, reason: "killswitch_halt" }
       };
     }
