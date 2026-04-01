@@ -11,7 +11,10 @@ python3 -m ruff check ml scripts
 echo "==> Type-checking backend (TypeScript)"
 (
   cd app
-  npm install --no-audit --no-fund
+  npm config delete proxy || true
+  npm config delete http-proxy || true
+  npm config delete https-proxy || true
+  NODE_OPTIONS="${NODE_OPTIONS:---dns-result-order=ipv4first}" npm install --no-audit --no-fund --no-package-lock
   npm run build
 )
 
