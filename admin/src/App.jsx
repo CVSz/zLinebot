@@ -1,5 +1,6 @@
 import Dashboard from "./pages/Dashboard";
 import Billing from "./pages/Billing";
+import TikTokShopPanel from "./pages/TikTokShopPanel";
 
 export default function App() {
   return (
@@ -8,6 +9,8 @@ export default function App() {
       <Dashboard />
       <hr />
       <Billing />
+      <hr />
+      <TikTokShopPanel />
     </div>
   );
 }

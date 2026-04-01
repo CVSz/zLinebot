@@ -23,6 +23,8 @@ import { trace } from "./middleware/trace.js";
 import { dsrRouter } from "./routes/dsr.js";
 import { auditRouter } from "./routes/audit.js";
 import { health } from "./health.js";
+import { tiktokRouter } from "./routes/tiktok.js";
+import { adminTikTokRouter } from "./routes/admin.tiktok.js";
 import { configureDQN } from "./rl/dqn.js";
 import { initializeRewardSystem } from "./rl/reward.js";
 import { initializeMultiAgentRewardSystem } from "./rl/multi-agent-reward.js";
@@ -52,6 +54,7 @@ app.use(express.json({ limit: "10mb" }));
 app.get("/health", health);
 
 app.use("/", feedbackRouter);
+app.use("/", tiktokRouter);
 
 const tenantRouter = Router();
 tenantRouter.use(tenant, setTenantSchema);
@@ -60,6 +63,7 @@ tenantRouter.use(cartRouter);
 tenantRouter.use(ordersRouter);
 tenantRouter.use(adminRouter);
 tenantRouter.use(adminBillingRouter);
+tenantRouter.use(adminTikTokRouter);
 tenantRouter.use(dsrRouter);
 tenantRouter.use(auditRouter);
 app.use("/", tenantRouter);

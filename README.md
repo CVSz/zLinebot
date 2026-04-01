@@ -8,6 +8,8 @@ ZLineBot is a multi-tenant commerce + conversational AI platform with LINE integ
 - Multi-tenant request isolation (`x-api-key`, `x-tenant-id`)
 - Commerce APIs: products, cart, orders, billing
 - LINE webhook bot integration with signature verification
+- TikTok OAuth + webhook integration (auth URL, callback, signed webhooks)
+- TikTok Shop control panel + automated showcase-to-video draft generation
 - Realtime metrics over WebSocket (`/ws`)
 - Privacy and DSR APIs (consent/access/delete/rectify)
 - Flexible deployment: Docker Compose, scripts, Kubernetes manifests
@@ -38,6 +40,8 @@ Endpoints:
 - `GET /admin/health`, `GET /admin/billing`
 - `POST /admin/audit/ledger-export`
 - `POST /privacy/consent`, `GET /privacy/consent/:userId`, `POST /privacy/dsr`
+- `GET /auth/tiktok/url`, `GET /auth/tiktok/callback`, `POST /webhook/tiktok`
+- `GET /admin/tiktok-shop/overview`, `POST /admin/tiktok-shop/sync-showcase`, `POST /admin/tiktok-shop/auto-video`
 
 ## Realtime Metrics
 - WebSocket: `ws://<host>/ws`
