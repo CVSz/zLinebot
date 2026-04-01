@@ -1,29 +1,40 @@
-# ZLineBot README (EN)
+# ZLineBot Documentation (EN)
 
-AI-assisted multi-tenant commerce platform with LINE integration, realtime metrics, billing/compliance APIs, and Docker/k8s deployment options.
+Last updated: 2026-04-01
+
+ZLineBot is a multi-tenant commerce platform with LINE webhook integration, privacy tooling, billing endpoints, and optional ML/recommendation modules.
 
 ## Quick Start
+
 ```bash
 cp .env.example .env
 docker compose up -d --build
 curl http://localhost:3000/health
 ```
 
-## Core APIs
-- `GET /products`, `POST /products`
-- `GET /cart/:userId`, `POST /cart`
-- `GET /orders`, `POST /orders`
-- `GET /admin/billing`
-- `POST /privacy/consent`, `POST /privacy/dsr`
+## Core API Surface
 
-Required headers:
+Tenant-scoped endpoints require:
+
 - `x-api-key: <TENANT_API_KEY>`
 - `x-tenant-id: <tenant_id>`
 
-## Related Docs
-- `user_manual_en.md`, `user_manual_th.md`
-- `admin_manual_en.md`, `admin_manual_th.md`
-- `install_manual_en.md`, `install_manual_th.md`
-- `roadmaps_en.md`, `roadmaps_th.md`
-- `blueprint_en.md`, `blueprint_th.md`
-- `presentation_en.md`, `presentation_th.md`
+Key routes:
+
+- `GET /health`
+- `GET /products`, `POST /products`
+- `POST /events/view`, `POST /events/click`
+- `GET /cart/:userId`, `POST /cart`
+- `GET /orders`, `POST /orders`
+- `GET /admin/health`
+- `GET /admin/billing`
+- `POST /privacy/consent`, `GET /privacy/consent/:userId`
+- `POST /privacy/dsr`
+
+## Documentation Map
+
+- `docs/USER.md` — End-user workflows
+- `docs/ADMIN.md` — Admin workflows and API examples
+- `docs/MANUAL.md` — Local/devops setup and deployment scripts
+- `docs/openapi.yaml` — API schema (when maintained)
+- `docs/REPO_STRUCTURE.md` — Repository architecture and upgrade notes

@@ -1,42 +1,42 @@
 # Repository Structure & Upgrade Readiness
 
-เอกสารนี้สรุปโครงสร้าง repository เพื่อให้ onboarding ง่ายขึ้นและรองรับการอัปเกรดในอนาคตได้ดีขึ้น
+Last updated: 2026-04-01
 
-## 1) โฟลเดอร์หลัก
+This document summarizes the repository layout to speed up onboarding and reduce upgrade risk.
 
-- `app/` — Backend service หลัก (TypeScript/Express, LINE webhook, business services)
+## 1) Top-level directories
+
+- `app/` — Primary backend service (TypeScript/Express, webhooks, tenant APIs)
 - `admin/` — Admin dashboard (React + Vite)
-- `mobile/` — โค้ดตัวอย่าง/โมดูล mobile app
-- `db/` — Schema SQL แยกตามโดเมน (identity, billing, privacy, risk, events ฯลฯ)
-- `docs/` — คู่มือการใช้งานและ OpenAPI
-- `docker/`, `k8s/`, `infra/`, `cloudflare/`, `cloud/` — Deployment และ infrastructure
-- `ml/` — โมดูล ML simulation/training
-- `scripts/` — automation scripts สำหรับ install/lint/deploy
+- `mobile/` — Mobile app code/modules
+- `db/` — SQL schemas by domain (identity, billing, privacy, risk, events, etc.)
+- `docs/` — User/admin manuals and OpenAPI
+- `docker/`, `k8s/`, `infra/`, `cloudflare/`, `cloud/` — Deployment and infrastructure assets
+- `ml/` — ML simulation/training and ranking modules
+- `scripts/` — Automation scripts for install/lint/deploy
 
-> Note: เอกสาร `readme_en.md` และ `readme_th.md` ถูกย้ายไปที่ `docs/` แล้ว
+## 2) Baseline standards before upgrades
 
-## 2) จุดที่ควรยึดเป็นมาตรฐานก่อนอัปเกรด
+1. **Single environment contract**
+   - Keep required values in `.env.example` complete and current.
+   - Validate critical env values at backend startup.
 
-1. **Environment contract เดียวกันทุก service**
-   - กำหนดค่าที่ต้องมีใน `.env.example` ให้ครบ
-   - เพิ่ม validation ของ env ในโค้ด (backend)
+2. **Quality gates in CI**
+   - Ensure lint/type-check/test commands run in CI.
+   - Keep a fast validation path for quick PR feedback.
 
-2. **Type-check และ lint ต้องรันได้โดยไม่พึ่ง dependency หนักเกินจำเป็น**
-   - แยก optional runtime dependency ที่ต้องดาวน์โหลด binary ออกเป็น profile
-   - CI ควรมีโหมด `fast-check` สำหรับตรวจคุณภาพโค้ดพื้นฐาน
+3. **Webhook and API security**
+   - Verify signatures for webhook providers.
+   - Keep tenant authentication headers mandatory on tenant routes.
 
-3. **Security-first webhook handling**
-   - ตรวจ signature ด้วย constant-time compare
-   - บันทึก error จาก upstream API ให้ตรวจสอบได้
+4. **Documentation discipline**
+   - Update docs in `docs/` when endpoints or behavior changes.
+   - Record ownership/responsibility as the project scales.
 
-4. **เอกสารสถาปัตยกรรมเดียว**
-   - อัปเดตไฟล์นี้ทุกครั้งที่เพิ่ม top-level directory
-   - ระบุ owner/ทีมรับผิดชอบในโฟลเดอร์สำคัญ (ภายหลังอาจแยกเป็น CODEOWNERS)
+## 3) Pre-release checklist
 
-## 3) รายการตรวจสอบก่อน release
-
-- รัน lint/type-check/unit tests ให้ครบ
-- ตรวจ schema migration กับสภาพแวดล้อม staging
-- ตรวจ webhook signature/key rotation
-- ตรวจเวอร์ชัน dependencies สำคัญ (`express`, `typescript`, `stripe`, `kafkajs`, `onnxruntime-node`)
-- อัปเดตเอกสารใน `docs/` หากมี endpoint หรือ behavior เปลี่ยน
+- Run lint/type-check/tests.
+- Validate schema compatibility in staging.
+- Verify webhook secrets and key rotation procedures.
+- Review core dependency versions.
+- Confirm docs and API examples are still accurate.
