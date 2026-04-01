@@ -24,6 +24,9 @@ export async function improve<TModel extends CandidateModel, TBatch = Batch>(
   const scores = await Promise.all(models.map((model) => evaluator(model, batch)));
   const bestIndex = scores.indexOf(Math.max(...scores));
   const best = models[bestIndex];
+  if (!best) {
+    throw new Error("failed to select best model");
+  }
 
   await splitter({ candidate: best.id, pct: 0.1 });
 

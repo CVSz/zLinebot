@@ -17,12 +17,12 @@ export async function rankBatch(features: number[][]): Promise<number[]> {
     throw new Error("foundation model is not loaded");
   }
 
-  if (features.length === 0 || features[0].length === 0) {
+  if (features.length === 0 || (features[0]?.length ?? 0) === 0) {
     return [];
   }
 
   const rows = features.length;
-  const cols = features[0].length;
+  const cols = features[0]?.length ?? 0;
   const flat = Float32Array.from(features.flat());
 
   const output = await session.run({

@@ -22,6 +22,10 @@ export function findArb(quotes: Quote[]): ArbitrageOpportunity | null {
 
   const buy = effective[0];
   const sell = effective[effective.length - 1];
+  if (!buy || !sell) {
+    return null;
+  }
+
   const spread = sell.eff - buy.eff;
   const isGoodSpread = spread > 0.02 * buy.eff;
   const acceptableLatency = sell.latencyMs < 1500;

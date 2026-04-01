@@ -27,7 +27,7 @@ function identity(d: number, value = 1) {
 function dot(a: number[], b: number[]) {
   let sum = 0;
   for (let i = 0; i < a.length; i += 1) {
-    sum += a[i] * (b[i] ?? 0);
+    sum += (a[i] ?? 0) * (b[i] ?? 0);
   }
   return sum;
 }
@@ -74,7 +74,7 @@ function shermanMorrison(Ainv: number[][], x: number[]) {
   }
 
   const next = Ainv.map((row, i) =>
-    row.map((value, j) => value - (AinvX[i] * AinvX[j]) / denom)
+    row.map((value, j) => value - ((AinvX[i] ?? 0) * (AinvX[j] ?? 0)) / denom)
   );
 
   return next;
@@ -89,8 +89,13 @@ export async function selectContextual(
     return null;
   }
 
-  const d = items[0].x.length;
-  let best = { id: items[0].id, score: Number.NEGATIVE_INFINITY };
+  const firstItem = items[0];
+  if (!firstItem) {
+    return null;
+  }
+
+  const d = firstItem.x.length;
+  let best = { id: firstItem.id, score: Number.NEGATIVE_INFINITY };
 
   for (const item of items) {
     if (item.x.length !== d) {

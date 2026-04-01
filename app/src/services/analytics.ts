@@ -10,6 +10,7 @@ export type EventPayload = {
   tenantId: string;
   userId?: string;
   value?: number;
+  payload?: unknown;
   ts: number;
 };
 

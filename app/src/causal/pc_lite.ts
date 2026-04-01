@@ -5,9 +5,14 @@ export function buildGraph(vars: string[], corr: CorrFn): Array<[string, string]
 
   for (let i = 0; i < vars.length; i += 1) {
     for (let j = i + 1; j < vars.length; j += 1) {
-      const c = Math.abs(corr(vars[i], vars[j]));
+      const left = vars[i];
+      const right = vars[j];
+      if (!left || !right) {
+        continue;
+      }
+      const c = Math.abs(corr(left, right));
       if (c > 0.2) {
-        edges.push([vars[i], vars[j]]);
+        edges.push([left, right]);
       }
     }
   }

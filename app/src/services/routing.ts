@@ -18,5 +18,5 @@ export function chooseWarehouse(candidates: WarehouseCandidate[]): WarehouseCand
       0.2 * (warehouse.stock > 0 ? 1 : 0)
   }));
 
-  return scored.sort((a, b) => b.score - a.score)[0];
+  return scored.sort((a, b) => b.score - a.score)[0] ?? null;
 }
