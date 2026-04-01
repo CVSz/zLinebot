@@ -1,56 +1,49 @@
-# MANUAL
+# OPERATIONS MANUAL
 
-## Start
+Last updated: 2026-04-01
 
+## Local start
+
+```bash
+cp .env.example .env
 docker compose up -d --build
+curl http://localhost:3000/health
+```
 
-## Cloudflare
+## Webhook endpoints
 
+- LINE webhook: `POST /webhook` (service base URL + `/webhook`)
+- Stripe webhook: `POST /webhook/stripe`
+- PromptPay webhook: `POST /webhook/promptpay`
+
+## Cloudflare tunnel (optional)
+
+```bash
 cloudflared tunnel login
 cloudflared tunnel create zlinebot
-
-## LINE webhook
-
-https://zlinebot.zeaz.dev/api/webhook
-
-## Mobile deployment installers
-
-Android deployment installer:
-
-```bash
-./scripts/install_android_deploy.sh
 ```
 
-> Linux note: currently targets Debian/Ubuntu systems (uses `apt`).
+## Installers and automation scripts
 
-iOS deployment installer (macOS only):
+Core installers:
 
-```bash
-./scripts/install_ios_deploy.sh
-```
+- `./install.sh`
+- `./install_full.sh`
+- `./install_ultimate.sh`
 
-Full-stack mobile deployment installer:
+Scripts directory installers:
 
-```bash
-./scripts/install_mobile_fullstack_deploy.sh
-```
+- `./scripts/install_auto.sh`
+- `./scripts/install_no_cost.sh`
+- `./scripts/install_secure.sh`
+- `./scripts/install_mobile_fullstack_deploy.sh`
+- `./scripts/install_android_deploy.sh`
+- `./scripts/install_ios_deploy.sh`
+- `./scripts/install_meta_fullstack_android_app_deploy.sh`
+- `./scripts/install_meta_fullstack_ios_app_deploy.sh`
+- `./scripts/install_meta_fullstack_mobile_app_deploy.sh`
 
-> Linux note: currently targets Debian/Ubuntu systems (uses `apt`).
+## Notes
 
-Meta full-stack Android application deployment installer:
-
-```bash
-./scripts/install_meta_fullstack_android_app_deploy.sh
-```
-
-Meta full-stack iOS application deployment installer:
-
-```bash
-./scripts/install_meta_fullstack_ios_app_deploy.sh
-```
-
-Meta full-stack mobile application deployment installer:
-
-```bash
-./scripts/install_meta_fullstack_mobile_app_deploy.sh
-```
+- Some mobile/deploy scripts are OS-specific (Linux/macOS requirements differ).
+- Keep `.env.example` and deployment manifests in sync before releases.
