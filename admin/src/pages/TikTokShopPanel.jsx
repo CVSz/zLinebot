@@ -12,8 +12,13 @@ export default function TikTokShopPanel() {
   const [durationSec, setDurationSec] = useState(25);
   const [selectedProductIds, setSelectedProductIds] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   const selectedCount = useMemo(() => selectedProductIds.length, [selectedProductIds]);
+  const filteredProducts = useMemo(
+    () => overview.showcaseProducts.filter((product) => product.title.toLowerCase().includes(search.toLowerCase())),
+    [overview.showcaseProducts, search]
+  );
 
   async function loadOverview() {
     const response = await fetch("/api/admin/tiktok-shop/overview", { headers: apiHeaders });
@@ -64,56 +69,53 @@ export default function TikTokShopPanel() {
 
   return (
     <section>
-      <h2>TikTok Shop Control Panel</h2>
-      <p>Sync showcase products and auto-generate TikTok video drafts from selected items.</p>
-
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+      <h2 className="section-title">TikTok Shop Automation</h2>
+      <div className="toolbar">
         <button type="button" onClick={syncShowcase} disabled={loading}>
           Sync Showcase
         </button>
         <button type="button" onClick={generateVideos} disabled={loading}>
-          Generate Video Drafts ({selectedCount || "All"})
+          Generate Drafts ({selectedCount || "All"})
         </button>
-        <label>
-          Tone:
-          <input value={tone} onChange={(event) => setTone(event.target.value)} />
-        </label>
-        <label>
-          Duration (sec):
-          <input
-            type="number"
-            min={10}
-            max={90}
-            value={durationSec}
-            onChange={(event) => setDurationSec(Number(event.target.value) || 25)}
-          />
-        </label>
+        <input placeholder="Search products" value={search} onChange={(event) => setSearch(event.target.value)} />
+        <input value={tone} onChange={(event) => setTone(event.target.value)} placeholder="Tone" />
+        <input
+          type="number"
+          min={10}
+          max={90}
+          value={durationSec}
+          onChange={(event) => setDurationSec(Number(event.target.value) || 25)}
+        />
       </div>
 
-      <h3>Showcase Products ({overview.showcaseCount})</h3>
-      {overview.showcaseProducts.map((product) => (
-        <label key={product.id} style={{ display: "block" }}>
-          <input
-            type="checkbox"
-            checked={selectedProductIds.includes(product.id)}
-            onChange={() => toggleProduct(product.id)}
-          />
-          {product.title} — ฿{product.price} ({product.source})
-        </label>
-      ))}
+      <div className="card" style={{ marginBottom: 12 }}>
+        <strong>Showcase Products ({overview.showcaseCount})</strong>
+        {filteredProducts.map((product) => (
+          <label key={product.id} style={{ display: "block", marginTop: 8 }}>
+            <input
+              type="checkbox"
+              checked={selectedProductIds.includes(product.id)}
+              onChange={() => toggleProduct(product.id)}
+            />{" "}
+            {product.title} — ฿{product.price} ({product.source})
+          </label>
+        ))}
+      </div>
 
-      <h3>Automation Jobs</h3>
-      {overview.jobs.map((job) => (
-        <div key={job.id} style={{ border: "1px solid #ddd", padding: 8, marginBottom: 8 }}>
-          <strong>{job.id}</strong> • {job.status} • {job.durationSec}s • tone: {job.tone}
-          {job.drafts.map((draft) => (
-            <details key={draft.productId}>
-              <summary>{draft.productId}</summary>
-              <pre style={{ whiteSpace: "pre-wrap" }}>{draft.script}</pre>
-            </details>
-          ))}
-        </div>
-      ))}
+      <div>
+        <h3 className="section-title">Automation Jobs</h3>
+        {overview.jobs.map((job) => (
+          <div key={job.id} className="card" style={{ marginBottom: 8 }}>
+            <strong>{job.id}</strong> • {job.status} • {job.durationSec}s • tone: {job.tone}
+            {job.drafts.map((draft) => (
+              <details key={draft.productId}>
+                <summary>{draft.productId}</summary>
+                <pre style={{ whiteSpace: "pre-wrap" }}>{draft.script}</pre>
+              </details>
+            ))}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
