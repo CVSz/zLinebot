@@ -26,5 +26,9 @@ export async function negotiate(task: Task, agents: NegotiatingAgent[]): Promise
   offers = offers.sort((a, b) => b.utility - a.utility).slice(0, 3);
 
   const counter = await Promise.all(offers.map((offer) => offer.agent.counter(task, offer)));
-  return counter.sort((a, b) => b.ev - a.ev)[0];
+  const bestOffer = counter.sort((a, b) => b.ev - a.ev)[0];
+  if (!bestOffer) {
+    throw new Error("Negotiation: Offer is undefined");
+  }
+  return bestOffer;
 }

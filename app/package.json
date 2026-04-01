@@ -36,7 +36,8 @@
     "typescript": "^5.7.2",
     "eslint": "^8.57.0",
     "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "@typescript-eslint/parser": "^7.8.0"
+    "@typescript-eslint/parser": "^7.8.0",
+    "@types/cors": "^2.8.17"
   },
   "description": "zLinebot Backend - Multi-tenant Commerce + LINE Conversational AI",
   "main": "dist/main.js",

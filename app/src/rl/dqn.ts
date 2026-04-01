@@ -47,7 +47,7 @@ function dot(weights: number[][], input: number[]): number[] {
   for (let row = 0; row < weights.length; row += 1) {
     const value = input[row] ?? 0;
     for (let col = 0; col < cols; col += 1) {
-      output[col] += value * (weights[row]?.[col] ?? 0);
+      output[col] = (output[col] ?? 0) + value * (weights[row]?.[col] ?? 0);
     }
   }
 
@@ -57,7 +57,8 @@ function dot(weights: number[][], input: number[]): number[] {
 function maxIndex(values: number[]): number {
   let best = 0;
   for (let i = 1; i < values.length; i += 1) {
-    if (values[i] > values[best]) {
+    const current = values[i] ?? Number.NEGATIVE_INFINITY;
+    if (current > (values[best] ?? Number.NEGATIVE_INFINITY)) {
       best = i;
     }
   }
@@ -197,7 +198,11 @@ export class DQN {
       absoluteTdError += Math.abs(tdError);
 
       for (let i = 0; i < this.stateDim; i += 1) {
-        this.onlineWeights[i][transition.action] += this.learningRate * tdError * (transition.state[i] ?? 0);
+        const onlineRow = this.onlineWeights[i];
+        if (!onlineRow) {
+          continue;
+        }
+        onlineRow[transition.action] = (onlineRow[transition.action] ?? 0) + this.learningRate * tdError * (transition.state[i] ?? 0);
       }
 
       transition.priority = Math.max(Math.abs(tdError), 1e-6);
@@ -239,9 +244,14 @@ export class DQN {
   private softUpdateTarget(): void {
     for (let i = 0; i < this.stateDim; i += 1) {
       for (let j = 0; j < this.actionCount; j += 1) {
-        const online = this.onlineWeights[i][j];
-        const target = this.targetWeights[i][j];
-        this.targetWeights[i][j] = this.tau * online + (1 - this.tau) * target;
+        const onlineRow = this.onlineWeights[i];
+        const targetRow = this.targetWeights[i];
+        if (!onlineRow || !targetRow) {
+          continue;
+        }
+        const online = onlineRow[j] ?? 0;
+        const target = targetRow[j] ?? 0;
+        targetRow[j] = this.tau * online + (1 - this.tau) * target;
       }
     }
   }
