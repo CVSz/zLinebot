@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# zLinebot META-ORCHESTRATOR (Unified & Fully Idempotent - v2026.04.01)
+# zLinebot META-ORCHESTRATOR (Unified & Fully Idempotent - v2026.04.01 - Docker Fix)
 # Merged: All installers, mobile full-stack, security tools, linting, generator,
 #         and end-to-end pipeline. Safe for repeated execution.
 # Features Preserved: LINE/TikTok, commerce APIs, privacy, mobile React Native,
@@ -32,11 +32,27 @@ EOF_DOC
   log "Documentation regenerated (backup created if applicable)."
 }
 
-# === IDEMPOTENT BASE DEPENDENCIES ===
+# === IDEMPOTENT BASE DEPENDENCIES (Docker conflict-aware + official repo) ===
 install_base_deps() {
-  log "Ensuring base dependencies..."
+  log "Ensuring base dependencies (with Docker conflict handling)..."
+
+  # Clean up common conflicting container runtime packages before install.
+  $SUDO apt-get remove -y --purge docker docker-engine docker.io containerd runc containerd.io docker-compose-v2 2>/dev/null || true
+  $SUDO apt-get autoremove -y 2>/dev/null || true
+
+  # Prepare Docker's official apt repository for reliable versions.
   $SUDO apt-get update -qq
-  $SUDO apt-get install -y docker.io docker-compose-v2 git curl jq python3-pip
+  $SUDO apt-get install -y ca-certificates curl gnupg
+  $SUDO install -m 0755 -d /etc/apt/keyrings
+  $SUDO curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  $SUDO chmod a+r /etc/apt/keyrings/docker.asc
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+    | $SUDO tee /etc/apt/sources.list.d/docker.list >/dev/null
+
+  # Install Docker Engine from official repo plus shared project dependencies.
+  $SUDO apt-get update -qq
+  $SUDO apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git curl jq python3-pip
   $SUDO systemctl enable --now docker 2>/dev/null || true
 
   # Idempotent readiness check
