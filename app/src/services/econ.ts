@@ -16,7 +16,11 @@ export function objective(metrics: EconObjective): number {
 }
 
 export function choose<T>(actions: T[], evalFn: (action: T) => EconObjective): T {
-  let best = actions[0];
+  if (actions.length === 0) {
+    throw new Error("actions must not be empty");
+  }
+
+  let best = actions[0] as T;
   let bestValue = Number.NEGATIVE_INFINITY;
 
   for (const action of actions) {

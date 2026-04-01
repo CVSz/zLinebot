@@ -76,6 +76,10 @@ export async function runFinalStage(input: FinalStageInput): Promise<FinalStageR
   }));
 
   const winningBid = select(scoredBids);
+  if (!winningBid) {
+    throw new Error("No winning bid available");
+  }
+
   enforceSLA({ latency: winningBid.eta * 1000, errorRate: 0.01 });
 
   const ipsEstimate = ips([{ reward: winningBid.score, pi_new: 0.6, pi_old: 0.5 }]);

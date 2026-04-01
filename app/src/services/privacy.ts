@@ -13,7 +13,7 @@ export function pseudo(id: string) {
 }
 
 export function anonymizeEmail(email: string) {
-  const [localPart, domain = ""] = email.split("@");
+  const [localPart = "", domain = ""] = email.split("@");
   const hidden = localPart.length <= 2 ? "**" : `${localPart.slice(0, 2)}***`;
   return `${hidden}@${domain}`;
 }

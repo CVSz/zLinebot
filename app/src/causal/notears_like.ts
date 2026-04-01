@@ -3,7 +3,8 @@ export function h(adjacency: number[][]) {
   let trace = 0;
 
   for (let i = 0; i < d; i += 1) {
-    trace += Math.exp(adjacency[i][i] * adjacency[i][i]);
+    const diag = adjacency[i]?.[i] ?? 0;
+    trace += Math.exp(diag * diag);
   }
 
   return trace - d;
