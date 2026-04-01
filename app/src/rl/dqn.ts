@@ -199,11 +199,10 @@ export class DQN {
 
       for (let i = 0; i < this.stateDim; i += 1) {
         const onlineRow = this.onlineWeights[i];
-        if (!onlineRow) {
+        if (!onlineRow || transition.action < 0 || transition.action >= this.actionCount) {
           continue;
         }
         onlineRow[transition.action] = (onlineRow[transition.action] ?? 0) + this.learningRate * tdError * (transition.state[i] ?? 0);
-      }
 
       transition.priority = Math.max(Math.abs(tdError), 1e-6);
     }
