@@ -60,18 +60,26 @@ if ! command -v k3s >/dev/null 2>&1; then
   curl -sfL https://get.k3s.io | sh -
 fi
 
-export KUBECONFIG="$K3S_KUBECONFIG"
-sleep 10
-
 if ! command -v kubectl >/dev/null 2>&1; then
   ln -sf /usr/local/bin/k3s /usr/local/bin/kubectl
 fi
+
+export KUBECONFIG="$K3S_KUBECONFIG"
+echo "⏳ Waiting for Kubernetes API..."
+until kubectl get nodes >/dev/null 2>&1; do
+  echo "Waiting for k3s..."
+  sleep 5
+done
+echo "✅ Kubernetes is ready"
+
+systemctl enable k3s || true
+systemctl restart k3s || true
 
 if ! command -v helm >/dev/null 2>&1; then
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+kubectl apply --validate=false -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
 sleep 20
 
