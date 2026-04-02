@@ -2,8 +2,10 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+ENV ONNXRUNTIME_NODE_INSTALL=skip
+
 COPY package*.json ./
-RUN npm install
+RUN npm install --ignore-scripts
 
 COPY . .
 RUN npm run build
