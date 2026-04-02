@@ -1,108 +1,236 @@
-# ZLineBot
+# 🚀 zLinebot
 
-ZLineBot is a multi-tenant commerce + conversational AI platform designed for LINE-centric businesses that need production APIs, operational control panels, compliance controls, and an extensible AI/ML stack.
+### AI-Native Platform for Intelligent Messaging, Personalization, and Distributed Systems
+**From LINE Bot → AI → ML → Web3 → Cloud Infrastructure (All-in-One Stack)**
 
-> Language docs: [README (TH)](docs/README_th.md)
+---
 
-## 1) What this repository provides
+<p align="center">
+  <img src="https://img.shields.io/badge/AI-Platform-blueviolet" />
+  <img src="https://img.shields.io/badge/Node.js-TypeScript-green" />
+  <img src="https://img.shields.io/badge/Python-ML-yellow" />
+  <img src="https://img.shields.io/badge/Kubernetes-Cloud--Native-blue" />
+  <img src="https://img.shields.io/badge/Cloudflare-Edge-orange" />
+  <img src="https://img.shields.io/badge/Web3-Smart%20Contracts-black" />
+  <img src="https://img.shields.io/badge/License-MIT-brightgreen" />
+</p>
 
-- **Backend APIs (TypeScript/Express)** for products, carts, orders, billing, privacy/DSR, TikTok/LINE integrations, observability, and policy control.
-- **Admin web app (React/Vite)** for operations, billing, dashboarding, and TikTok Shop workflows.
-- **Data + infra assets** (Postgres schemas, Kafka/Flink assets, Docker Compose, K8s manifests, Terraform/Cloudflare).
-- **AI/ML modules** including ranking/recommendation scaffolding, RL components, world-model experiments, and feature-store hooks.
+---
 
-## 2) System architecture (high level)
+> **zLinebot is not just a chatbot.**
+> It is a **full-stack AI platform** that combines LINE messaging, machine learning, data systems, and cloud-native infrastructure into one unified architecture.
 
-- `app/` — core API, business logic, service integrations, policy/guardrails, agents, RL, identity, privacy, compliance.
-- `admin/` — operational console UI.
-- `docs/` — manuals, roadmap/proposal/presentation, governance/localization docs, API schema.
-- `db/` + `warehouse/` — schema and analytics SQL.
-- `docker/`, `k8s/`, `infra/`, `cloudflare/`, `cloud/` — deployment and platform artifacts.
-- `ml/` + `flink/` — ML training/serving helpers and stream-processing jobs.
+---
 
-For deeper structure notes, see **[docs/REPO_STRUCTURE.md](docs/REPO_STRUCTURE.md)**.
+## ⚡ One-Liner
 
-## 3) Quick start (local)
+> Build intelligent, scalable, AI-powered systems with LINE as the frontend and a full distributed stack behind it.
 
-```bash
-cp .env.example .env
-docker compose up -d --build
-curl http://localhost:3000/health
+---
+
+## 🇬🇧 English
+
+### 🧠 About the Platform
+
+zLinebot is a full-stack AI platform that combines:
+
+- 🤖 LINE Bot (frontend conversational interface)
+- ⚙️ Backend services (Node.js + TypeScript)
+- 🧠 Machine Learning services (Python)
+- 📊 Data platform (SQL + analytics/feature systems)
+- 🌐 Cloud-native infrastructure (Docker, Kubernetes, Cloudflare)
+- ⛓ Web3 integrations (smart contracts)
+
+### 🏗 Architecture Overview
+
+```mermaid
+flowchart TD
+
+User[👤 User] --> LINE[📱 LINE Messaging API]
+LINE --> CF[☁️ Cloudflare Worker / Edge]
+CF --> APP[⚙️ Backend (Node.js / TS)]
+
+APP --> DB[(🗄 Database)]
+APP --> API[🔌 External APIs]
+
+APP --> ML[🧠 ML Services (Python)]
+ML --> MODEL[📊 Models: RL / Ranking / Anomaly]
+
+APP --> FLINK[🌊 Stream Processing]
+FLINK --> WH[(🏢 Data Warehouse)]
+
+APP --> ADMIN[🖥 Admin Dashboard]
+APP --> MOBILE[📱 Mobile App]
+
+APP --> WEB3[⛓ Smart Contracts]
+
+subgraph Infra
+DOCKER[🐳 Docker]
+K8S[☸️ Kubernetes]
+ISTIO[🔀 Service Mesh]
+TF[🏗 Terraform]
+end
+
+APP --> DOCKER
+DOCKER --> K8S
+K8S --> ISTIO
+K8S --> TF
 ```
 
-Expected: health endpoint returns JSON `{"ok": true}` or equivalent healthy response.
+### 🛠 Tech Stack
 
-## 4) Core runtime requirements
+#### Backend
+- Node.js (TypeScript) → `app/`
+- Cloudflare Workers → `cloudflare/`
 
-- Docker Engine + Docker Compose
-- Linux/macOS shell environment
-- Optional for dev workflow: Node.js 20+, npm, Python 3.10+
+#### Frontend
+- Admin Dashboard (Vite/React) → `admin/`
+- Mobile App (React Native) → `mobile/`
 
-For complete setup options (minimal/no-cost/full production-like), see **[docs/INSTALL_FULL.md](docs/INSTALL_FULL.md)**.
+#### AI / ML
+- Python services and experiments → `ml/`
+- RL, ranking, federated learning, explainable AI
 
-## 5) Tenant model and required headers
+#### Data
+- SQL schemas → `db/`
+- Warehouse assets → `warehouse/`
+- Stream processing jobs → `flink/`
 
-Most tenant-scoped routes require:
+#### Infrastructure
+- Docker / Compose → `docker/`
+- Kubernetes manifests → `k8s/`
+- Terraform → `infra/`
+- Nginx gateway → `nginx/`
 
-- `x-api-key: <TENANT_API_KEY>`
-- `x-tenant-id: <tenant_id>`
+#### Web3
+- Solidity contracts → `contracts/`
 
-Typical functional domains:
+### 📁 Project Structure
 
-- Commerce: `/products`, `/cart`, `/orders`
-- Admin: `/admin/health`, `/admin/billing`, `/admin/audit/*`
-- Privacy: `/privacy/consent`, `/privacy/dsr`
-- Integrations: `/auth/tiktok/*`, `/webhook/tiktok`, `/line/*`
-- Realtime: `/ws`
+```text
+zLinebot/
+├── app/            # Backend services
+├── admin/          # Dashboard
+├── mobile/         # Mobile app
+├── ml/             # AI models
+├── db/             # Database schemas
+├── warehouse/      # Analytics
+├── flink/          # Streaming jobs
+├── contracts/      # Smart contracts
+├── cloudflare/     # Edge workers
+├── cloud/          # Worker services
+├── docker/         # Containers
+├── k8s/            # Kubernetes
+├── infra/          # Terraform
+├── scripts/        # Automation
+├── docs/           # Documentation
+└── nginx/          # Gateway
+```
 
-Canonical route implementations live in `app/src/routes/`.
+### ⚡ Highlights
 
-## 6) Full documentation map
+- 🔥 Full-stack AI platform (not only a bot)
+- 🧠 AI-first architecture
+- 🌐 End-to-end flow: Edge → Cloud → ML → Data
+- ⚙️ Modular and scalable design
+- 🚀 Production-ready infrastructure path (K8s + Service Mesh)
 
-### Essential manuals
-- **Installation (full detail):** [docs/INSTALL_FULL.md](docs/INSTALL_FULL.md)
-- User Manual (EN): [docs/user_manual_en.md](docs/user_manual_en.md)
-- User Manual (TH): [docs/user_manual_th.md](docs/user_manual_th.md)
-- Admin Manual (EN): [docs/admin_manual_en.md](docs/admin_manual_en.md)
-- Admin Manual (TH): [docs/admin_manual_th.md](docs/admin_manual_th.md)
-- Install Manual (EN): [docs/install_manual_en.md](docs/install_manual_en.md)
-- Install Manual (TH): [docs/install_manual_th.md](docs/install_manual_th.md)
+### 🎯 Use Cases
 
-### Planning / product docs
-- **Proposal (full detail):** [docs/PROPOSAL_FULL.md](docs/PROPOSAL_FULL.md)
-- Blueprint (EN): [docs/blueprint_en.md](docs/blueprint_en.md)
-- Blueprint (TH): [docs/blueprint_th.md](docs/blueprint_th.md)
-- Roadmap (EN): [docs/roadmaps_en.md](docs/roadmaps_en.md)
-- Roadmap (TH): [docs/roadmaps_th.md](docs/roadmaps_th.md)
-- Presentation (EN): [docs/presentation_en.md](docs/presentation_en.md)
-- Presentation (TH): [docs/presentation_th.md](docs/presentation_th.md)
+- LINE AI Chatbot
+- Recommendation System
+- Automation Platform
+- AI SaaS
+- Web3 + AI Integration
 
-### Operations / technical references
-- Repo structure: [docs/REPO_STRUCTURE.md](docs/REPO_STRUCTURE.md)
-- OpenAPI reference: [docs/openapi.yaml](docs/openapi.yaml)
-- Existing docs bundle: [docs/MANUAL.md](docs/MANUAL.md), [docs/ADMIN.md](docs/ADMIN.md), [docs/USER.md](docs/USER.md)
+### 🔮 Future Direction
 
-### Archived/readme redirects
-- [docs/readme_en.md](docs/readme_en.md)
-- [docs/readme_th.md](docs/readme_th.md)
-- [docs/readme_en_redirect.md](docs/readme_en_redirect.md)
-- [docs/readme_th_redirect.md](docs/readme_th_redirect.md)
+- LLM / AI Agents
+- Real-time personalization
+- Privacy-preserving AI (FHE / Federated)
+- Tokenized ecosystem
 
-## 7) GitHub community files kept at repository root
+---
 
-To keep GitHub-native discovery and security workflows intact, these remain at root:
+## 🇹🇭 ภาษาไทย
 
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Contributing Guide](CONTRIBUTING.md)
-- [Security Policy](SECURITY.md)
-- [Repository README](README.md)
-- [License](LICENSE)
+### 🧠 ภาพรวมแพลตฟอร์ม
 
-Localized variants are in `docs/`.
+zLinebot คือแพลตฟอร์ม AI แบบ Full-stack ที่รวม:
 
-## 8) Recommended next steps
+- 🤖 LINE Bot (ช่องทางสนทนาฝั่งผู้ใช้)
+- ⚙️ Backend services (Node.js + TypeScript)
+- 🧠 บริการ Machine Learning (Python)
+- 📊 Data platform (SQL + ระบบ analytics/feature)
+- 🌐 โครงสร้างพื้นฐานแบบ Cloud-native (Docker, Kubernetes, Cloudflare)
+- ⛓ การเชื่อมต่อ Web3 (Smart Contracts)
 
-1. Complete environment secrets in `.env`.
-2. Start stack and verify `/health` + key tenant routes.
-3. Read **INSTALL_FULL** and **PROPOSAL_FULL** to choose rollout strategy.
-4. Use manuals in `docs/` for operator and admin onboarding.
+### 🏗 ภาพรวมสถาปัตยกรรม
+
+สถาปัตยกรรมใช้งานแบบครบวงจรตั้งแต่ผู้ใช้บน LINE ผ่าน Edge ไปยัง backend, ML, data pipeline และ infrastructure สำหรับ production ตามแผนภาพด้านบน.
+
+### 🛠 เทคสแตก
+
+#### Backend
+- Node.js (TypeScript) → `app/`
+- Cloudflare Workers → `cloudflare/`
+
+#### Frontend
+- Admin Dashboard (Vite/React) → `admin/`
+- Mobile App (React Native) → `mobile/`
+
+#### AI / ML
+- Python services และงานทดลองโมเดล → `ml/`
+- รองรับ RL, ranking, federated learning, explainable AI
+
+#### Data
+- SQL schemas → `db/`
+- งาน warehouse → `warehouse/`
+- งาน stream processing → `flink/`
+
+#### Infrastructure
+- Docker / Compose → `docker/`
+- Kubernetes → `k8s/`
+- Terraform → `infra/`
+- Nginx → `nginx/`
+
+#### Web3
+- Solidity → `contracts/`
+
+### ⚡ จุดเด่น
+
+- 🔥 เป็นแพลตฟอร์ม AI แบบ Full-stack (ไม่ใช่แค่ bot)
+- 🧠 วางสถาปัตยกรรมแบบ AI-first
+- 🌐 ครบทั้ง Edge → Cloud → ML → Data
+- ⚙️ โครงสร้างแยกส่วน ช่วยให้ขยายระบบได้ง่าย
+- 🚀 พร้อมต่อยอดสู่ production (K8s + Service Mesh)
+
+### 🎯 ตัวอย่างการใช้งาน
+
+- LINE AI Chatbot
+- Recommendation System
+- Automation Platform
+- AI SaaS
+- Web3 + AI Integration
+
+### 🔮 ทิศทางในอนาคต
+
+- LLM / AI Agents
+- การทำ personalization แบบ real-time
+- Privacy AI (FHE / Federated)
+- ระบบนิเวศแบบ tokenized
+
+---
+
+## 📚 Additional Documentation
+
+- Thai docs entry: [docs/README_th.md](docs/README_th.md)
+- Full structure guide: [docs/REPO_STRUCTURE.md](docs/REPO_STRUCTURE.md)
+- Installation guide: [docs/INSTALL_FULL.md](docs/INSTALL_FULL.md)
+- Product proposal: [docs/PROPOSAL_FULL.md](docs/PROPOSAL_FULL.md)
+
+---
+
+## 📄 License
+
+MIT License
