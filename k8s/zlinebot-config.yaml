@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zlinebot-config
+  namespace: zlinebot
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  DOMAIN: "zlinebot.zeaz.dev"
+  LINE_BOT_WEBHOOK_PATH: "/webhook"
