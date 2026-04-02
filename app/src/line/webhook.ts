@@ -1,8 +1,8 @@
-import crypto from "crypto";
 import express, { Router } from "express";
 import type { LineReplyMessage } from "./handler.js";
 import { handleMessage, handlePostback } from "./handler.js";
 import { env } from "../utils/env.js";
+import { verifyLineSignature } from "../security/signature.js";
 
 type LineTextMessageEvent = {
   type: "message";
@@ -55,9 +55,14 @@ webhookRouter.post(
     }
 
     const rawBody = (req as RawRequest).rawBody ?? JSON.stringify(req.body);
-    const hash = crypto.createHmac("sha256", env.lineChannelSecret).update(rawBody).digest("base64");
 
-    if (!isValidLineSignature(hash, signature)) {
+    if (
+      !verifyLineSignature({
+        requestBody: rawBody,
+        secret: env.lineChannelSecret,
+        signature
+      })
+    ) {
       return res.status(401).send("invalid signature");
     }
 
@@ -131,19 +136,4 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: 
   }
 
   return result;
-}
-
-function isValidLineSignature(computedHash: string, signature: string): boolean {
-  try {
-    const computedBuffer = Buffer.from(computedHash, "base64");
-    const signatureBuffer = Buffer.from(signature, "base64");
-
-    if (computedBuffer.length !== signatureBuffer.length) {
-      return false;
-    }
-
-    return crypto.timingSafeEqual(computedBuffer, signatureBuffer);
-  } catch {
-    return false;
-  }
 }
