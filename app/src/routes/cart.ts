@@ -3,14 +3,14 @@ import { db } from "../db.js";
 import { routeRateLimit } from "../middleware/rateLimit.js";
 
 export const cartRouter = Router();
-cartRouter.use(routeRateLimit({ max: 90, windowMs: 60_000 }));
+const cartLimiter = routeRateLimit({ max: 90, windowMs: 60_000 });
 
-cartRouter.get("/cart/:userId", async (req, res) => {
+cartRouter.get("/cart/:userId", cartLimiter, async (req, res) => {
   const result = await db.query("SELECT * FROM carts WHERE user_id = $1", [req.params.userId]);
   res.json(result.rows);
 });
 
-cartRouter.post("/cart", async (req, res) => {
+cartRouter.post("/cart", cartLimiter, async (req, res) => {
   const { userId, productId, qty = 1 } = req.body;
   const result = await db.query(
     "INSERT INTO carts (user_id, product_id, qty) VALUES ($1, $2, $3) RETURNING *",

@@ -5,9 +5,9 @@ import { onClick, onView } from "../services/events.reward.js";
 import { routeRateLimit } from "../middleware/rateLimit.js";
 
 export const productsRouter = Router();
-productsRouter.use(routeRateLimit({ max: 90, windowMs: 60_000 }));
+const productsLimiter = routeRateLimit({ max: 90, windowMs: 60_000 });
 
-productsRouter.get("/products", async (req, res) => {
+productsRouter.get("/products", productsLimiter, async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";
   const result = await db.query(
     "SELECT * FROM products WHERE tenant_id = $1 ORDER BY id DESC",
@@ -16,7 +16,7 @@ productsRouter.get("/products", async (req, res) => {
   res.json(result.rows);
 });
 
-productsRouter.post("/products", async (req, res) => {
+productsRouter.post("/products", productsLimiter, async (req, res) => {
   const { name, price, stock = 0, desc = "" } = req.body;
   const tenantId = req.header("x-tenant-id") ?? "demo";
   const result = await db.query(
@@ -37,7 +37,7 @@ productsRouter.post("/products", async (req, res) => {
 });
 
 
-productsRouter.post("/events/view", async (req, res) => {
+productsRouter.post("/events/view", productsLimiter, async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";
   const { productId } = req.body as { productId?: string | number };
 
@@ -50,7 +50,7 @@ productsRouter.post("/events/view", async (req, res) => {
   res.status(202).json({ status: "accepted" });
 });
 
-productsRouter.post("/events/click", async (req, res) => {
+productsRouter.post("/events/click", productsLimiter, async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";
   const { productId } = req.body as { productId?: string | number };
 

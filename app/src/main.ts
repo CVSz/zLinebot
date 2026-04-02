@@ -57,7 +57,7 @@ app.use("/", rateLimitByIp(60), feedbackRouter);
 app.use("/", rateLimitByIp(45), tiktokRouter);
 
 const tenantRouter = Router();
-tenantRouter.use(tenant, setTenantSchema);
+tenantRouter.use(rateLimitByIp(90), tenant, setTenantSchema);
 tenantRouter.use(productsRouter);
 tenantRouter.use(cartRouter);
 tenantRouter.use(ordersRouter);

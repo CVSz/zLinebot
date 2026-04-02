@@ -21,7 +21,7 @@ type TikTokWebhookBody = {
 };
 
 export const tiktokRouter = Router();
-tiktokRouter.use(routeRateLimit({ max: 45, windowMs: 60_000 }));
+const tiktokLimiter = routeRateLimit({ max: 45, windowMs: 60_000 });
 
 const rawBodyJson = express.json({
   verify: (req, _res, buf) => {
@@ -29,7 +29,7 @@ const rawBodyJson = express.json({
   }
 });
 
-tiktokRouter.get("/auth/tiktok/url", (req, res) => {
+tiktokRouter.get("/auth/tiktok/url", tiktokLimiter, (req, res) => {
   if (!env.tiktokClientKey || !env.tiktokRedirectUri) {
     return res.status(500).json({ error: "tiktok oauth is not configured" });
   }
@@ -50,7 +50,7 @@ tiktokRouter.get("/auth/tiktok/url", (req, res) => {
   });
 });
 
-tiktokRouter.get("/auth/tiktok/callback", async (req, res) => {
+tiktokRouter.get("/auth/tiktok/callback", tiktokLimiter, async (req, res) => {
   if (!env.tiktokClientKey || !env.tiktokClientSecret || !env.tiktokRedirectUri) {
     return res.status(500).json({ error: "tiktok oauth is not configured" });
   }
@@ -82,7 +82,7 @@ tiktokRouter.get("/auth/tiktok/callback", async (req, res) => {
   }
 });
 
-tiktokRouter.post("/webhook/tiktok", rawBodyJson, async (req, res) => {
+tiktokRouter.post("/webhook/tiktok", tiktokLimiter, rawBodyJson, async (req, res) => {
   if (!env.tiktokWebhookSecret) {
     return res.status(500).json({ error: "tiktok webhook secret is not configured" });
   }
