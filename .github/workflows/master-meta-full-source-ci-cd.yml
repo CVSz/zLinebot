@@ -42,7 +42,7 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
     env:
-      FLY_REGISTRY: registry.fly.io/zlinebot
+      FLY_REGISTRY: local/zlinebot
     steps:
       - name: Checkout
         uses: actions/checkout@v5
