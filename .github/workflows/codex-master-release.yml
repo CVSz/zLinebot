@@ -23,7 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install && npx eslint .
+      - name: Install app dependencies
+        run: npm ci --ignore-scripts
+        working-directory: app
+      - name: Type-check backend
+        run: npm run build
+        working-directory: app
       - run: pip install pylint && pylint **/*.py || true
       - run: shellcheck **/*.sh || true
       - run: pip install bandit && bandit -r .
@@ -37,12 +42,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install
+      - run: npm ci --ignore-scripts
+        working-directory: app
       - run: npm test -- --coverage
+        working-directory: app
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/lcov.info
+          path: app/coverage/lcov.info
 
   build:
     name: Build & Package
