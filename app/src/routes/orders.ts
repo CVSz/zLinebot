@@ -3,8 +3,10 @@ import { db } from "../db.js";
 import { promptpayQR } from "../services/payment.js";
 import { createOrder } from "../services/order.js";
 import { createCheckout } from "../services/stripe.js";
+import { routeRateLimit } from "../middleware/rateLimit.js";
 
 export const ordersRouter = Router();
+ordersRouter.use(routeRateLimit({ max: 60, windowMs: 60_000 }));
 
 ordersRouter.get("/orders", async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";

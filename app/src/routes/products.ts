@@ -2,8 +2,10 @@ import { Router } from "express";
 import { db } from "../db.js";
 import { indexProduct } from "../services/reco.index.js";
 import { onClick, onView } from "../services/events.reward.js";
+import { routeRateLimit } from "../middleware/rateLimit.js";
 
 export const productsRouter = Router();
+productsRouter.use(routeRateLimit({ max: 90, windowMs: 60_000 }));
 
 productsRouter.get("/products", async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";

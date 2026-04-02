@@ -15,6 +15,10 @@ function escapeCsv(value: string) {
   return `"${escaped}"`;
 }
 
+function safePathToken(value: string) {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
 export async function exportLedger(tenantId: string) {
   const result = await db.query<LedgerRow>(
     `SELECT id, amount::text, type, ref, created_at::text
@@ -38,7 +42,7 @@ export async function exportLedger(tenantId: string) {
   const exportDir = process.env.EXPORT_DIR ?? "/tmp/exports";
   await mkdir(exportDir, { recursive: true });
 
-  const filePath = path.join(exportDir, `ledger_${tenantId}_${Date.now()}.csv`);
+  const filePath = path.join(exportDir, `ledger_${safePathToken(tenantId)}_${Date.now()}.csv`);
   await writeFile(filePath, [header, ...lines].join("\n"), "utf8");
 
   return filePath;

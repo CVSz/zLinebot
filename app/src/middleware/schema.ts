@@ -19,7 +19,7 @@ export async function setTenantSchema(req: SchemaRequest, res: Response, next: N
     req.schema = schema;
     req.db = db;
 
-    await db.query(`SET search_path TO ${schema}, public`);
+    await db.query("SELECT set_config('search_path', format('%I,public', $1), false)", [schema]);
     return next();
   } catch (error) {
     return next(error);

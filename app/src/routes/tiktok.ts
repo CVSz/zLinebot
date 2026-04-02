@@ -1,4 +1,5 @@
 import express, { Router } from "express";
+import { routeRateLimit } from "../middleware/rateLimit.js";
 import { env } from "../utils/env.js";
 import {
   buildAuthorizationUrl,
@@ -20,6 +21,7 @@ type TikTokWebhookBody = {
 };
 
 export const tiktokRouter = Router();
+tiktokRouter.use(routeRateLimit({ max: 45, windowMs: 60_000 }));
 
 const rawBodyJson = express.json({
   verify: (req, _res, buf) => {

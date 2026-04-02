@@ -1,9 +1,11 @@
 import { randomUUID } from "crypto";
 import { Router } from "express";
 import { db } from "../db.js";
+import { routeRateLimit } from "../middleware/rateLimit.js";
 import { pseudo } from "../services/privacy.js";
 
 export const dsrRouter = Router();
+dsrRouter.use(routeRateLimit({ max: 30, windowMs: 60_000 }));
 
 dsrRouter.post("/privacy/consent", async (req, res) => {
   const { userId, purpose, granted, version } = req.body as {
