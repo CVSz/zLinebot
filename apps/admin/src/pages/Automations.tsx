@@ -2,21 +2,28 @@ import { useState } from "react";
 
 export default function Automations() {
   const [steps, setSteps] = useState<any[]>([]);
+  const [status, setStatus] = useState("");
 
   function addAction() {
     setSteps([...steps, { type: "action", action: "auto_reply", message: "" }]);
   }
 
-  function saveAutomation() {
-    fetch("/automation", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        trigger: "tiktok.message",
-        config: { steps }
-      })
-    });
+  async function saveAutomation() {
+    setStatus("Saving...");
+    try {
+      const res = await fetch("/automation", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trigger: "tiktok.message",
+          config: { steps }
+        })
+      });
+      setStatus(res.ok ? "Saved" : "Save failed");
+    } catch (_err) {
+      setStatus("Save failed");
+    }
   }
 
   return (
@@ -44,6 +51,7 @@ export default function Automations() {
       <button onClick={saveAutomation} className="bg-green-500 text-white p-2 ml-2">
         Save
       </button>
+      <span className="ml-2">{status}</span>
     </div>
   );
 }

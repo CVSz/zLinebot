@@ -10,6 +10,7 @@ export async function executeAutomation(job: any) {
   if (!automation) return;
 
   const { steps } = automation.config as any;
+  if (!Array.isArray(steps)) return;
 
   const context = payload;
 
@@ -25,6 +26,7 @@ export async function executeAutomation(job: any) {
 }
 
 function evalCondition(step: any, ctx: any) {
+  if (!step?.field) return false;
   return ctx[step.field] === step.value;
 }
 
