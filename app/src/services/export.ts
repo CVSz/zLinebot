@@ -16,6 +16,10 @@ function escapeCsv(value: string) {
   return `"${escaped}"`;
 }
 
+function safePathToken(value: string) {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
 export async function exportLedger(tenantId: string) {
   const result = await db.query<LedgerRow>(
     `SELECT id, amount::text, type, ref, created_at::text

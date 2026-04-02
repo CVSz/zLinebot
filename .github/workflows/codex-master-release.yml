@@ -1,0 +1,112 @@
+name: Codex Master Full Meta Final Release
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Environment Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker --version
+      - run: node --version
+      - run: python3 --version
+      - run: kubectl version --client || echo "Skipping kubeval"
+
+  lint:
+    name: Lint & Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install && npx eslint .
+      - run: pip install pylint && pylint **/*.py || true
+      - run: shellcheck **/*.sh || true
+      - run: pip install bandit && bandit -r .
+      - run: docker run --rm -i hadolint/hadolint < Dockerfile
+      - run: |
+          curl -s https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz | tar xz
+          ./kubeval k8s/*.yaml || true
+
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - run: npm test -- --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/lcov.info
+
+  build:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t zlinebot:latest .
+      - run: docker save zlinebot:latest | gzip > zlinebot.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zlinebot-docker
+          path: zlinebot.tar.gz
+
+  deploy:
+    name: Multi-Environment Deployment
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+      - name: Deploy to Kubernetes Cluster
+        run: kubectl apply -f k8s/
+      - name: Deploy to Cloudflare Workers
+        run: wrangler publish
+
+  versioning:
+    name: Auto Versioning & Changelog
+    runs-on: ubuntu-latest
+    needs: [lint, test, build]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Semantic Release
+        run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github
+      - name: Run Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: semantic-release
+
+  release:
+    name: Final Release
+    runs-on: ubuntu-latest
+    needs: [validate, lint, test, build, deploy, versioning]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect Release Notes
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            cp CHANGELOG.md RELEASE_NOTES.md
+          else
+            echo "Codex Final Release - April 2026" > RELEASE_NOTES.md
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: codex-release
+          path: |
+            RELEASE_NOTES.md
+            coverage/lcov.info
+            zlinebot.tar.gz
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            RELEASE_NOTES.md
+            zlinebot.tar.gz
+          tag_name: v${{ github.run_number }}
+          name: "Codex Final Release v${{ github.run_number }} (2026)"
