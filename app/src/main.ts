@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import express, { Router } from "express";
 import helmet from "helmet";
 import { env } from "./utils/env.js";
+import validateEnv from "./security/secret-validator.js";
 import { rateLimit, rateLimitByIp } from "./middleware/rateLimit.js";
 import { isAuthorizedTenantKey, readHeader, resolveTenantId, tenant } from "./middleware/tenant.js";
 import { setTenantSchema } from "./middleware/schema.js";
@@ -34,6 +35,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import { startAutomationWorker } from "./queue/automation.js";
 
 dotenv.config();
+validateEnv();
 
 const app = express();
 
