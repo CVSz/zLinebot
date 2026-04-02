@@ -16,6 +16,7 @@ if (fs.existsSync(envPath) && !force) {
 
 const env = `
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/zlinebot
+REDIS_URL=redis://redis:6379
 
 JWT_SECRET=${generateSecret(64)}
 API_KEY_SECRET=${generateSecret(64)}
@@ -28,6 +29,7 @@ TIKTOK_REDIRECT_URI=https://zlinebot.zeaz.dev/auth/tiktok/callback
 STRIPE_SECRET=
 STRIPE_PRICE_PRO=
 STRIPE_WEBHOOK_SECRET=
+OPENAI_API_KEY=
 
 APP_URL=https://zlinebot.zeaz.dev
 `;

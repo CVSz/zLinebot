@@ -9,6 +9,7 @@ import { automationRoutes } from "./routes/automation";
 import { webhookRoutes } from "./routes/webhook";
 import { analyticsRoutes } from "./routes/analytics";
 import { stripeWebhook } from "./routes/stripeWebhook";
+import { logsRoutes } from "./routes/logs";
 import { rateLimitPlugin } from "./plugins/rateLimit";
 import { authMiddleware } from "./middleware/auth";
 
@@ -32,6 +33,10 @@ app.register(automationRoutes, {
 app.register(webhookRoutes, { prefix: "/webhook" });
 app.register(analyticsRoutes, {
   prefix: "/analytics",
+  preHandler: authMiddleware
+});
+app.register(logsRoutes, {
+  prefix: "/logs",
   preHandler: authMiddleware
 });
 app.register(stripeWebhook);
