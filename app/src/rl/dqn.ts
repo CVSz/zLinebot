@@ -37,28 +37,27 @@ function randomMatrix(rows: number, cols: number): number[][] {
 }
 
 function dot(weights: number[][], input: number[]): number[] {
-  if (!weights.length) {
-    return [];
-  }
+  if (!weights.length) return [];
 
   const cols = weights[0]?.length ?? 0;
   const output = Array.from({ length: cols }, () => 0);
 
   for (let row = 0; row < weights.length; row += 1) {
     const value = input[row] ?? 0;
+    const weightRow = weights[row];
+    if (!weightRow) continue;
+
     for (let col = 0; col < cols; col += 1) {
-      output[col] = (output[col] ?? 0) + value * (weights[row]?.[col] ?? 0);
+      output[col] = (output[col] ?? 0) + value * (weightRow[col] ?? 0);
     }
   }
-
   return output;
 }
 
 function maxIndex(values: number[]): number {
   let best = 0;
   for (let i = 1; i < values.length; i += 1) {
-    const current = values[i] ?? Number.NEGATIVE_INFINITY;
-    if (current > (values[best] ?? Number.NEGATIVE_INFINITY)) {
+    if ((values[i] ?? -Infinity) > (values[best] ?? -Infinity)) {
       best = i;
     }
   }
@@ -66,9 +65,7 @@ function maxIndex(values: number[]): number {
 }
 
 function samplePrioritizedBatch(items: Transition[], size: number): Transition[] {
-  if (items.length <= size) {
-    return [...items];
-  }
+  if (items.length <= size) return [...items];
 
   const totalPriority = items.reduce((sum, item) => sum + Math.max(item.priority ?? 1, 1e-6), 0);
   const result: Transition[] = [];
@@ -76,7 +73,6 @@ function samplePrioritizedBatch(items: Transition[], size: number): Transition[]
   for (let i = 0; i < size; i += 1) {
     const threshold = Math.random() * totalPriority;
     let cumulative = 0;
-
     for (const item of items) {
       cumulative += Math.max(item.priority ?? 1, 1e-6);
       if (cumulative >= threshold) {
@@ -85,15 +81,12 @@ function samplePrioritizedBatch(items: Transition[], size: number): Transition[]
       }
     }
   }
-
   return result;
 }
 
 export function encodeState(state: AgentState): number[] {
-  const vector = state.vector.slice(0, 252);
-  while (vector.length < 252) {
-    vector.push(0);
-  }
+  const vector = [...state.vector.slice(0, 252)];
+  while (vector.length < 252) vector.push(0);
 
   const candidateCount = state.candidates.length;
   const actionRate = state.actionsLastMin;
@@ -152,39 +145,27 @@ export class DQN {
     if (Math.random() < this.epsilon) {
       return Math.floor(Math.random() * this.actionCount);
     }
-
-    const qValues = dot(this.onlineWeights, state);
-    return maxIndex(qValues);
+    return maxIndex(dot(this.onlineWeights, state));
   }
 
   public storeTransition(transition: Omit<Transition, "reward" | "agentContributions"> & { reward: number | CoordinatedReward }): void {
-    const normalizedReward =
-      typeof transition.reward === "number" ? transition.reward : transition.reward.globalReward;
-    const agentContributions =
-      typeof transition.reward === "number"
-        ? undefined
-        : Object.fromEntries(transition.reward.agentRewards.map((entry) => [entry.agentId, entry.globalContribution]));
+    const normalizedReward = typeof transition.reward === "number" ? transition.reward : transition.reward.globalReward;
+    const agentContributions = typeof transition.reward === "number" 
+      ? undefined 
+      : Object.fromEntries(transition.reward.agentRewards.map((e) => [e.agentId, e.globalContribution]));
 
-    const storedTransition: Transition = {
-      ...transition,
-      reward: normalizedReward,
-      agentContributions
-    };
-
-    const priority = Math.max(Math.abs(storedTransition.reward), 1e-6);
-    this.replayBuffer.push({ ...storedTransition, priority });
-    if (this.replayBuffer.length > this.replayBufferSize) {
-      this.replayBuffer.shift();
-    }
+    const stored: Transition = { ...transition, reward: normalizedReward, agentContributions };
+    stored.priority = Math.max(Math.abs(stored.reward), 1e-6);
+    
+    this.replayBuffer.push(stored);
+    if (this.replayBuffer.length > this.replayBufferSize) this.replayBuffer.shift();
   }
 
   public trainStep(): number | null {
-    if (this.replayBuffer.length < this.batchSize) {
-      return null;
-    }
+    if (this.replayBuffer.length < this.batchSize) return null;
 
     const batch = samplePrioritizedBatch(this.replayBuffer, this.batchSize);
-    let absoluteTdError = 0;
+    let totalTdError = 0;
 
     for (const transition of batch) {
       const qOnline = dot(this.onlineWeights, transition.state);
@@ -192,65 +173,55 @@ export class DQN {
       const qNextTarget = dot(this.targetWeights, transition.nextState);
 
       const bestNextAction = maxIndex(qNextOnline);
-      const target = transition.reward + (transition.done ? 0 : this.gamma * (qNextTarget[bestNextAction] ?? 0));
+      const nextTargetQ = qNextTarget[bestNextAction] ?? 0;
+      const target = transition.reward + (transition.done ? 0 : this.gamma * nextTargetQ);
       const prediction = qOnline[transition.action] ?? 0;
       const tdError = target - prediction;
-      absoluteTdError += Math.abs(tdError);
 
+      totalTdError += Math.abs(tdError);
+
+      // Weight Update Loop (Fix for TS1128)
       for (let i = 0; i < this.stateDim; i += 1) {
-        const onlineRow = this.onlineWeights[i];
-        if (!onlineRow || transition.action < 0 || transition.action >= this.actionCount) {
-          continue;
+        const row = this.onlineWeights[i];
+        if (row && transition.action >= 0 && transition.action < this.actionCount) {
+          row[transition.action] = (row[transition.action] ?? 0) + this.learningRate * tdError * (transition.state[i] ?? 0);
         }
-        onlineRow[transition.action] = (onlineRow[transition.action] ?? 0) + this.learningRate * tdError * (transition.state[i] ?? 0);
-
+      }
       transition.priority = Math.max(Math.abs(tdError), 1e-6);
     }
 
     this.epsilon = clamp(this.epsilon * this.epsilonDecay, this.epsilonMin, 1);
     this.stepCount += 1;
+    if (this.stepCount % this.targetUpdateInterval === 0) this.softUpdateTarget();
 
-    if (this.stepCount % this.targetUpdateInterval === 0) {
-      this.softUpdateTarget();
-    }
-
-    return absoluteTdError / batch.length;
+    return totalTdError / batch.length;
   }
 
   public toAgentAction(state: AgentState): AgentAction {
-    const encoded = encodeState(state);
-    const actionIndex = this.selectAction(encoded);
+    const actionIndex = this.selectAction(encodeState(state));
     const action = this.actionSpace[actionIndex] ?? "hold";
     const pick = state.candidates[0]?.id ?? null;
 
     switch (action) {
-      case "discount":
-        return { type: "rank", pick, discount: 0.15 };
-      case "bundle":
-        return { type: "rank", pick, discount: 0.1 };
-      case "upsell":
-        return { type: "rank", pick, discount: 0.05 };
-      case "reject":
-        return { type: "rank", pick: null, discount: 0, reject: true };
-      case "escalate":
-        return { type: "rank", pick: null, discount: 0 };
-      case "hold":
-      default:
-        return { type: "rank", pick, discount: 0 };
+      case "discount": return { type: "rank", pick, discount: 0.15 };
+      case "bundle":   return { type: "rank", pick, discount: 0.1 };
+      case "upsell":   return { type: "rank", pick, discount: 0.05 };
+      case "reject":   return { type: "rank", pick: null, discount: 0, reject: true };
+      case "escalate": return { type: "rank", pick: null, discount: 0 };
+      default:         return { type: "rank", pick, discount: 0 };
     }
   }
 
   private softUpdateTarget(): void {
     for (let i = 0; i < this.stateDim; i += 1) {
+      const onlineRow = this.onlineWeights[i];
+      const targetRow = this.targetWeights[i];
+      if (!onlineRow || !targetRow) continue;
+
       for (let j = 0; j < this.actionCount; j += 1) {
-        const onlineRow = this.onlineWeights[i];
-        const targetRow = this.targetWeights[i];
-        if (!onlineRow || !targetRow) {
-          continue;
-        }
-        const online = onlineRow[j] ?? 0;
-        const target = targetRow[j] ?? 0;
-        targetRow[j] = this.tau * online + (1 - this.tau) * target;
+        const onlineVal = onlineRow[j] ?? 0;
+        const targetVal = targetRow[j] ?? 0;
+        targetRow[j] = this.tau * onlineVal + (1 - this.tau) * targetVal;
       }
     }
   }
@@ -259,9 +230,7 @@ export class DQN {
 let dqnInstance: DQN | null = null;
 
 export function configureDQN(config: DqnConfig): DQN {
-  if (!dqnInstance) {
-    dqnInstance = new DQN(config);
-  }
+  if (!dqnInstance) dqnInstance = new DQN(config);
   return dqnInstance;
 }
 
