@@ -7,7 +7,14 @@ const apiHeaders = {
 };
 
 export default function TikTokShopPanel() {
-  const [overview, setOverview] = useState({ showcaseProducts: [], jobs: [], showcaseCount: 0 });
+  const [overview, setOverview] = useState({
+    showcaseProducts: [],
+    jobs: [],
+    showcaseCount: 0,
+    userProfiles: [],
+    userProfilesCount: 0
+  });
+  const [insight, setInsight] = useState("");
   const [tone, setTone] = useState("energetic");
   const [durationSec, setDurationSec] = useState(25);
   const [selectedProductIds, setSelectedProductIds] = useState([]);
@@ -38,6 +45,36 @@ export default function TikTokShopPanel() {
         headers: apiHeaders
       });
       await loadOverview();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadIntelligence() {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/admin/tiktok-shop/intelligence", { headers: apiHeaders });
+      if (!response.ok) throw new Error("Failed to load intelligence");
+      const payload = await response.json();
+      setInsight(payload.aiSummary || "");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function downloadExcel() {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/admin/tiktok-shop/export", { headers: apiHeaders });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "tiktok_shop_report.csv";
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
     } finally {
       setLoading(false);
     }
@@ -77,6 +114,12 @@ export default function TikTokShopPanel() {
         <button type="button" onClick={generateVideos} disabled={loading}>
           Generate Drafts ({selectedCount || "All"})
         </button>
+        <button type="button" onClick={loadIntelligence} disabled={loading}>
+          AI Analyze
+        </button>
+        <button type="button" onClick={downloadExcel} disabled={loading}>
+          Export Excel
+        </button>
         <input placeholder="Search products" value={search} onChange={(event) => setSearch(event.target.value)} />
         <input value={tone} onChange={(event) => setTone(event.target.value)} placeholder="Tone" />
         <input
@@ -100,6 +143,23 @@ export default function TikTokShopPanel() {
             {product.title} — ฿{product.price} ({product.source})
           </label>
         ))}
+      </div>
+
+      <div className="card" style={{ marginBottom: 12 }}>
+        <strong>User Profiles ({overview.userProfilesCount})</strong>
+        {overview.userProfiles.map((profile) => (
+          <div key={profile.id} style={{ marginTop: 8 }}>
+            <strong>{profile.username}</strong> ({profile.source}) • orders: {profile.orderCount} • spent: ฿{profile.totalSpent}
+            <div style={{ fontSize: 12, opacity: 0.8 }}>
+              nickname: {profile.nickname || "-"} | email: {profile.email || "-"} | phone: {profile.phone || "-"}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card" style={{ marginBottom: 12 }}>
+        <strong>AI Insight</strong>
+        <pre style={{ whiteSpace: "pre-wrap", marginTop: 8 }}>{insight || "Click AI Analyze to generate insight."}</pre>
       </div>
 
       <div>
