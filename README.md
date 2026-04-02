@@ -198,6 +198,16 @@ Notes:
 - Kubernetes cluster (production scale)
 - Edge deployment (Cloudflare Workers)
 
+### ☁️ Automated Cloudflare DNS Configuration
+
+This repository now includes automated Cloudflare DNS configuration:
+
+```bash
+CF_API_TOKEN=<token> CF_ZONE_ID=<zone_id> ./scripts/configure_cloudflare.sh infra/cloudflare_dns.yaml
+```
+
+For CI/CD automation, use `.github/workflows/cloudflare-config.yml` with GitHub secrets `CF_API_TOKEN` and `CF_ZONE_ID`.
+
 ---
 
 ## 🔮 Roadmap
