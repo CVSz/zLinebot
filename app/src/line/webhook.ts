@@ -66,7 +66,9 @@ webhookRouter.post(
 
     res.sendStatus(200);
 
-    void Promise.all(events.map((event) => handleEvent(event, env.lineChannelAccessToken))).catch((error) => {
+    const token = env.lineChannelAccessToken;
+
+    void Promise.all(events.map((event) => handleEvent(event, token))).catch((error) => {
       // eslint-disable-next-line no-console
       console.error("line webhook processing failed", error);
     });
