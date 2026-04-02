@@ -162,6 +162,33 @@ zLinebot/
 
 ---
 
+
+## 🔐 SaaS Secure Deployment (zlinebot.zeaz.dev)
+
+1. Generate a production `.env` with strong randomized secrets and domain-aware callback URLs:
+
+```bash
+bash scripts/generate-secrets.sh zlinebot.zeaz.dev
+```
+
+2. Start the full production stack (API, admin, worker, postgres, redis, nginx):
+
+```bash
+bash scripts/deploy.sh zlinebot.zeaz.dev
+```
+
+3. Optional SSL provisioning on host:
+
+```bash
+sudo certbot --nginx -d zlinebot.zeaz.dev
+```
+
+Notes:
+- `.env` is written with `chmod 600` for better secret hygiene.
+- `AUTOMATION_WORKER_MODE=external` runs queue workers as a dedicated service for SaaS-scale workloads.
+
+---
+
 ## 🚀 Deployment Options
 
 - Local development (Docker Compose)

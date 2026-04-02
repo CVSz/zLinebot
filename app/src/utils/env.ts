@@ -42,6 +42,15 @@ function parseBoolean(value: string | undefined, fallback: boolean): boolean {
   return fallback;
 }
 
+
+function parseWorkerMode(value: string | undefined): "embedded" | "external" {
+  if (!value) {
+    return "embedded";
+  }
+
+  return value.trim().toLowerCase() === "external" ? "external" : "embedded";
+}
+
 function requireNonEmpty(name: string, value: string | undefined): string {
   if (!value || value.trim().length === 0) {
     throw new Error(`Missing required environment variable: ${name}`);
@@ -85,5 +94,6 @@ export const env = Object.freeze({
   tiktokScope,
   tiktokShopApiBaseUrl: tiktokShopApiBaseUrl && tiktokShopApiBaseUrl.length > 0 ? tiktokShopApiBaseUrl : undefined,
   tiktokShopAccessToken: tiktokShopAccessToken && tiktokShopAccessToken.length > 0 ? tiktokShopAccessToken : undefined,
-  featureSyncEnabled: parseBoolean(process.env.FEATURE_SYNC_ENABLED, false)
+  featureSyncEnabled: parseBoolean(process.env.FEATURE_SYNC_ENABLED, false),
+  automationWorkerMode: parseWorkerMode(process.env.AUTOMATION_WORKER_MODE)
 });
