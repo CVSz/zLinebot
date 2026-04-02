@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: npm install && npx eslint .
+      - run: npm ci && npm run lint
         working-directory: app
       - run: pip install pylint && pylint **/*.py || true
       - run: shellcheck **/*.sh || true
@@ -60,6 +60,7 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/checkout@v6
+      - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only
       - run: kubectl apply -f k8s/
       - run: wrangler publish
