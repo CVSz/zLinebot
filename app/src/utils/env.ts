@@ -82,7 +82,7 @@ export const env = Object.freeze({
   redisUrl: process.env.REDIS_URL?.trim() || "redis://127.0.0.1:6379",
   jwtSecret: requireNonEmpty("JWT_SECRET", process.env.JWT_SECRET),
   sessionSecret: requireNonEmpty("SESSION_SECRET", process.env.SESSION_SECRET),
-  corsOrigin: corsOrigin && corsOrigin.length > 0 ? corsOrigin : "*",
+  corsOrigin: corsOrigin && corsOrigin.length > 0 ? corsOrigin : (process.env.APP_URL?.trim() || "http://localhost:3000"),
   rateLimit: parsePositiveInt(process.env.RATE_LIMIT, 100),
   queueConcurrency: parsePositiveInt(process.env.QUEUE_CONCURRENCY, 5),
   stripeSecretKey: process.env.STRIPE_SECRET_KEY?.trim(),

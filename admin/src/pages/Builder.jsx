@@ -26,7 +26,7 @@ const initialNodes = [
 const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
 
 export default function Builder() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
