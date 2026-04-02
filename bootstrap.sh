@@ -44,6 +44,10 @@ fi
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 log "Verifying cluster readiness..."
+until kubectl get nodes >/dev/null 2>&1; do
+  log "Waiting for k3s API to become ready..."
+  sleep 5
+done
 kubectl get nodes
 
 if ! command -v helm >/dev/null 2>&1; then
@@ -52,7 +56,7 @@ if ! command -v helm >/dev/null 2>&1; then
 fi
 
 log "Installing ingress-nginx..."
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+kubectl apply --validate=false -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 
 log "Installing cert-manager..."
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml

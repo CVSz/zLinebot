@@ -9,11 +9,38 @@ set -euo pipefail
 MODE="${1:-docker-full}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
+MAX_RETRIES="${MAX_RETRIES:-3}"
 
 SUDO=""
 if command -v sudo >/dev/null 2>&1; then SUDO="sudo"; fi
 
 log() { printf '[%s] %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$*"; }
+
+rollback_k3s_state() {
+  log "เริ่ม rollback สภาพแวดล้อม k3s ที่เสียหาย"
+  if command -v k3s-uninstall.sh >/dev/null 2>&1; then
+    $SUDO k3s-uninstall.sh || true
+  fi
+  $SUDO rm -rf /etc/rancher /var/lib/rancher || true
+  log "rollback เสร็จสิ้น"
+}
+
+run_master_self_healing() {
+  local attempt=1
+  while [[ "$attempt" -le "$MAX_RETRIES" ]]; do
+    log "เริ่ม master installer (attempt ${attempt}/${MAX_RETRIES})"
+    if bash "$ROOT_DIR/zlinebot-master.sh"; then
+      log "master installer สำเร็จใน attempt ${attempt}"
+      return 0
+    fi
+    log "master installer ล้มเหลวใน attempt ${attempt}"
+    rollback_k3s_state
+    attempt=$((attempt + 1))
+  done
+
+  log "master installer ล้มเหลวครบทุก attempt (${MAX_RETRIES})"
+  return 1
+}
 
 # === OFFICIAL DOCKER + ADVANCED SECURITY ===
 install_docker_official() {
@@ -93,8 +120,8 @@ run_mode() {
         log "ไม่พบไฟล์ zlinebot-master.sh"
         exit 1
       fi
-      log "เรียกใช้งาน master installer: zlinebot-master.sh"
-      bash "$ROOT_DIR/zlinebot-master.sh"
+      log "เรียกใช้งาน master installer แบบ self-healing: zlinebot-master.sh"
+      run_master_self_healing
       ;;
     docker-full|full-e2e)
       install_docker_official
