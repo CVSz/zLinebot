@@ -25,8 +25,36 @@ echo "🚀 zLinebot FINAL INSTALL STARTING..."
 
 apt-get update -y
 apt-get upgrade -y
-apt-get install -y git docker.io nginx
-systemctl enable --now docker
+apt-get install -y git nginx ca-certificates curl gnupg
+
+install_docker_engine() {
+  if command -v docker >/dev/null 2>&1; then
+    echo "Docker already installed, skipping engine installation."
+    systemctl enable --now docker || true
+    return 0
+  fi
+
+  install -m 0755 -d /etc/apt/keyrings
+  if [[ ! -f /etc/apt/keyrings/docker.asc ]]; then
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+  fi
+
+  if [[ ! -f /etc/apt/sources.list.d/docker.list ]]; then
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null
+  fi
+
+  apt-get update -y
+  # Resolve docker.io <-> containerd.io conflicts from mixed repositories.
+  apt-get remove -y docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc 2>/dev/null || true
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  systemctl enable --now docker
+}
+
+install_docker_engine
 
 if ! command -v k3s >/dev/null 2>&1; then
   curl -sfL https://get.k3s.io | sh -
