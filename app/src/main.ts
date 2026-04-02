@@ -19,6 +19,7 @@ import { startAggregator } from "./services/analytics.js";
 import { startWS } from "./ws.js";
 import { startFeatureSyncConsumer } from "./services/feature.sync.js";
 import { feedbackRouter } from "./routes/feedback.js";
+import { automationRouter } from "./routes/automation.js";
 import { trace } from "./middleware/trace.js";
 import { dsrRouter } from "./routes/dsr.js";
 import { auditRouter } from "./routes/audit.js";
@@ -29,6 +30,7 @@ import { configureDQN } from "./rl/dqn.js";
 import { initializeRewardSystem } from "./rl/reward.js";
 import { initializeMultiAgentRewardSystem } from "./rl/multi-agent-reward.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { startAutomationWorker } from "./queue/automation.js";
 
 dotenv.config();
 
@@ -39,7 +41,7 @@ initializeMultiAgentRewardSystem();
 configureDQN({ stateDim: 256 });
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: env.corsOrigin === "*" ? true : env.corsOrigin }));
 app.use(trace);
 app.use(rateLimit);
 
@@ -64,6 +66,7 @@ tenantRouter.use(ordersRouter);
 tenantRouter.use(adminRouter);
 tenantRouter.use(adminBillingRouter);
 tenantRouter.use(adminTikTokRouter);
+tenantRouter.use(automationRouter);
 tenantRouter.use(dsrRouter);
 tenantRouter.use(auditRouter);
 app.use("/", tenantRouter);
@@ -74,6 +77,10 @@ const server = http.createServer(app);
 let shuttingDown = false;
 
 startAggregator();
+const automationWorker = startAutomationWorker();
+automationWorker.on("failed", (job, error) => {
+  console.error("automation job failed", job?.id, error);
+});
 
 if (env.featureSyncEnabled) {
   startFeatureSyncConsumer().catch((error: unknown) => {
@@ -104,6 +111,8 @@ function shutdown(signal: NodeJS.Signals): void {
   shuttingDown = true;
   // eslint-disable-next-line no-console
   console.log(`${signal} received, shutting down gracefully`);
+
+  void automationWorker.close();
 
   server.close(() => {
     process.exit(0);
