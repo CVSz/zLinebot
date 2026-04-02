@@ -1,23 +1,32 @@
-import type { NextFunction, Request, Response } from "express";
+import type { RequestHandler } from "express";
+import { rateLimit as expressRateLimit } from "express-rate-limit";
 
-const bucket = new Map<string, { count: number; ts: number }>();
+type RateLimitOptions = {
+  windowMs?: number;
+  max?: number;
+  key?: (ip: string) => string;
+};
 
-export function rateLimit(req: Request, res: Response, next: NextFunction) {
-  const key = req.ip ?? "unknown";
-  const now = Date.now();
-  const windowMs = 60_000;
-  const max = 120;
-  const state = bucket.get(key);
+function buildRateLimit(options: RateLimitOptions = {}) {
+  const windowMs = options.windowMs ?? 60_000;
+  const max = options.max ?? 120;
+  const keyFn = options.key ?? ((ip: string) => ip);
 
-  if (!state || now - state.ts > windowMs) {
-    bucket.set(key, { count: 1, ts: now });
-    return next();
-  }
+  return expressRateLimit({
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => keyFn(req.ip ?? "unknown")
+  });
+}
 
-  if (state.count >= max) {
-    return res.status(429).json({ error: "Too many requests" });
-  }
+export const rateLimit = buildRateLimit();
 
-  state.count += 1;
-  return next();
+export function routeRateLimit(options: RateLimitOptions = {}): RequestHandler {
+  return buildRateLimit(options);
+}
+
+export function rateLimitByIp(max: number, windowMs = 60_000): RequestHandler {
+  return buildRateLimit({ max, windowMs });
 }

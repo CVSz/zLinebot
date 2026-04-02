@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "fs/promises";
+import { randomUUID } from "crypto";
 import path from "path";
 import { db } from "../db.js";
 
@@ -38,7 +39,7 @@ export async function exportLedger(tenantId: string) {
   const exportDir = process.env.EXPORT_DIR ?? "/tmp/exports";
   await mkdir(exportDir, { recursive: true });
 
-  const filePath = path.join(exportDir, `ledger_${tenantId}_${Date.now()}.csv`);
+  const filePath = path.join(exportDir, `ledger_${Date.now()}_${randomUUID()}.csv`);
   await writeFile(filePath, [header, ...lines].join("\n"), "utf8");
 
   return filePath;

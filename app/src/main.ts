@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import express, { Router } from "express";
 import helmet from "helmet";
 import { env } from "./utils/env.js";
-import { rateLimit } from "./middleware/rateLimit.js";
+import { rateLimit, rateLimitByIp } from "./middleware/rateLimit.js";
 import { isAuthorizedTenantKey, readHeader, resolveTenantId, tenant } from "./middleware/tenant.js";
 import { setTenantSchema } from "./middleware/schema.js";
 import { productsRouter } from "./routes/products.js";
@@ -53,11 +53,11 @@ app.use(express.json({ limit: "10mb" }));
 
 app.get("/health", health);
 
-app.use("/", feedbackRouter);
-app.use("/", tiktokRouter);
+app.use("/", rateLimitByIp(60), feedbackRouter);
+app.use("/", rateLimitByIp(45), tiktokRouter);
 
 const tenantRouter = Router();
-tenantRouter.use(tenant, setTenantSchema);
+tenantRouter.use(rateLimitByIp(90), tenant, setTenantSchema);
 tenantRouter.use(productsRouter);
 tenantRouter.use(cartRouter);
 tenantRouter.use(ordersRouter);

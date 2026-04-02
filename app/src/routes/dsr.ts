@@ -1,11 +1,13 @@
 import { randomUUID } from "crypto";
 import { Router } from "express";
 import { db } from "../db.js";
+import { routeRateLimit } from "../middleware/rateLimit.js";
 import { pseudo } from "../services/privacy.js";
 
 export const dsrRouter = Router();
+const dsrLimiter = routeRateLimit({ max: 30, windowMs: 60_000 });
 
-dsrRouter.post("/privacy/consent", async (req, res) => {
+dsrRouter.post("/privacy/consent", dsrLimiter, async (req, res) => {
   const { userId, purpose, granted, version } = req.body as {
     userId?: string;
     purpose?: string;
@@ -28,7 +30,7 @@ dsrRouter.post("/privacy/consent", async (req, res) => {
   return res.json({ ok: true });
 });
 
-dsrRouter.get("/privacy/consent/:userId", async (req, res) => {
+dsrRouter.get("/privacy/consent/:userId", dsrLimiter, async (req, res) => {
   const userId = req.params.userId;
   const result = await db.query(
     "SELECT purpose, granted, version, updated_at FROM consents WHERE user_id = $1 ORDER BY purpose",
@@ -38,7 +40,7 @@ dsrRouter.get("/privacy/consent/:userId", async (req, res) => {
   return res.json({ userId: pseudo(userId), consents: result.rows });
 });
 
-dsrRouter.post("/privacy/dsr", async (req, res) => {
+dsrRouter.post("/privacy/dsr", dsrLimiter, async (req, res) => {
   const { userId, type, payload } = req.body as {
     userId?: string;
     type?: "access" | "delete" | "rectify";

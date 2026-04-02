@@ -3,10 +3,12 @@ import { db } from "../db.js";
 import { promptpayQR } from "../services/payment.js";
 import { createOrder } from "../services/order.js";
 import { createCheckout } from "../services/stripe.js";
+import { routeRateLimit } from "../middleware/rateLimit.js";
 
 export const ordersRouter = Router();
+const ordersLimiter = routeRateLimit({ max: 60, windowMs: 60_000 });
 
-ordersRouter.get("/orders", async (req, res) => {
+ordersRouter.get("/orders", ordersLimiter, async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";
   const result = await db.query(
     "SELECT * FROM orders WHERE tenant_id = $1 ORDER BY id DESC",
@@ -15,7 +17,7 @@ ordersRouter.get("/orders", async (req, res) => {
   res.json(result.rows);
 });
 
-ordersRouter.post("/orders", async (req, res) => {
+ordersRouter.post("/orders", ordersLimiter, async (req, res) => {
   const { userId, total, paymentMethod = "promptpay" } = req.body;
   const tenantId = req.header("x-tenant-id") ?? "demo";
   const paymentQr = await promptpayQR(total);
