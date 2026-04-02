@@ -1,0 +1,21 @@
+name: "zLinebot CodeQL Config"
+
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+  - uses: ./.github/codeql/codeql-queries/
+
+paths:
+  - src/
+  - backend/
+  - bot/
+  - ml/
+  - k8s/
+
+paths-ignore:
+  - node_modules/
+  - dist/
+  - build/
+  - tests/mocks/
+  - coverage/
+  - docs/

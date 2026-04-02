@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 from transformers import BertModel
 
-
 BERT_MODEL_ID = "bert-base-uncased"
 BERT_MODEL_REVISION = os.getenv(
     "BERT_MODEL_REVISION", "86b5e0934494bd15c9632b12f734a8a67f723594"
