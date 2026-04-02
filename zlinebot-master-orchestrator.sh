@@ -77,7 +77,7 @@ generate_docs() {
 - k8s-secure mode ด้วย Istio mTLS, Vault secrets, SPIFFE workload identity
 
 ### การใช้งาน
-./zlinebot-master-orchestrator.sh [docker-full | k8s-secure | mobile-publish | full-e2e]
+./zlinebot-master-orchestrator.sh [master | docker-full | k8s-secure | mobile-publish | full-e2e]
 EOF_DOC
   log "เอกสารถูกสร้างใหม่และปรับปรุงแล้ว"
 }
@@ -85,6 +85,17 @@ EOF_DOC
 # === MODE EXECUTION ===
 run_mode() {
   case "$MODE" in
+    master)
+      if [[ ! -x "$ROOT_DIR/zlinebot-master.sh" ]]; then
+        chmod +x "$ROOT_DIR/zlinebot-master.sh" 2>/dev/null || true
+      fi
+      if [[ ! -f "$ROOT_DIR/zlinebot-master.sh" ]]; then
+        log "ไม่พบไฟล์ zlinebot-master.sh"
+        exit 1
+      fi
+      log "เรียกใช้งาน master installer: zlinebot-master.sh"
+      bash "$ROOT_DIR/zlinebot-master.sh"
+      ;;
     docker-full|full-e2e)
       install_docker_official
       docker compose up -d --build
@@ -96,7 +107,7 @@ run_mode() {
       deploy_fullstack_mobile
       ;;
     *)
-      log "โหมดไม่ถูกต้อง ใช้: docker-full, full-e2e, k8s-secure, mobile-publish"
+      log "โหมดไม่ถูกต้อง ใช้: master, docker-full, full-e2e, k8s-secure, mobile-publish"
       exit 1
       ;;
   esac
