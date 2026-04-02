@@ -43,8 +43,12 @@ case "$MODE" in
     echo "[Codex] Executing Hyperscale Kubernetes Deployment..." | tee -a $LOGFILE
     bash deploy-k8s.sh | tee -a $LOGFILE
     ;;
+  bootstrap)
+    echo "[Codex] Running full server bootstrap (k3s + TLS + deploy)..." | tee -a $LOGFILE
+    bash bootstrap.sh | tee -a $LOGFILE
+    ;;
   *)
-    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|hyperscale}"
+    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|hyperscale|bootstrap}"
     exit 1
     ;;
 esac
