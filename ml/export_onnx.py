@@ -5,7 +5,6 @@ from pathlib import Path
 import torch
 from train import RankNet
 
-
 MODEL_PATH = Path("model.pt")
 
 
