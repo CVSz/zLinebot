@@ -6,9 +6,8 @@ queries:
   - uses: ./.github/codeql/codeql-queries/
 
 paths:
-  - src/
-  - backend/
-  - bot/
+  - app/src/
+  - admin/
   - ml/
   - k8s/
 
