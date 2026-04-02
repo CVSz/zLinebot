@@ -70,6 +70,9 @@ const tiktokScope = process.env.TIKTOK_SCOPE?.trim() || "user.info.basic";
 const tiktokShopApiBaseUrl = process.env.TIKTOK_SHOP_API_BASE_URL?.trim();
 const tiktokShopAccessToken = process.env.TIKTOK_SHOP_ACCESS_TOKEN?.trim();
 const corsOrigin = process.env.CORS_ORIGIN?.trim();
+const openaiApiKey = process.env.OPENAI_API_KEY?.trim();
+const openaiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+const encryptionKey = process.env.ENCRYPTION_KEY?.trim();
 
 export const env = Object.freeze({
   port: parsePort(process.env.PORT),
@@ -95,5 +98,8 @@ export const env = Object.freeze({
   tiktokShopApiBaseUrl: tiktokShopApiBaseUrl && tiktokShopApiBaseUrl.length > 0 ? tiktokShopApiBaseUrl : undefined,
   tiktokShopAccessToken: tiktokShopAccessToken && tiktokShopAccessToken.length > 0 ? tiktokShopAccessToken : undefined,
   featureSyncEnabled: parseBoolean(process.env.FEATURE_SYNC_ENABLED, false),
+  openaiApiKey: openaiApiKey && openaiApiKey.length > 0 ? openaiApiKey : undefined,
+  openaiModel,
+  encryptionKey: encryptionKey && encryptionKey.length > 0 ? encryptionKey : undefined,
   automationWorkerMode: parseWorkerMode(process.env.AUTOMATION_WORKER_MODE)
 });

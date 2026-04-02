@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { createAutomationRule, listAutomationRules, triggerAutomations } from "../services/automation.js";
+import {
+  createAutomationRule,
+  createFlowAutomationRule,
+  listAutomationRules,
+  triggerAutomations
+} from "../services/automation.js";
 
 export const automationRouter = Router();
 
@@ -28,6 +33,26 @@ automationRouter.post("/automation/rules", async (req, res, next) => {
     }
 
     const id = await createAutomationRule({ tenantId, trigger, action, condition });
+    res.status(201).json({ id });
+  } catch (error) {
+    next(error);
+  }
+});
+
+automationRouter.post("/automation", async (req, res, next) => {
+  try {
+    const tenantId = String(req.headers["x-tenant-id"] ?? "demo");
+    const { trigger, config } = req.body as {
+      trigger?: string;
+      config?: Record<string, unknown>;
+    };
+
+    if (!trigger || !config) {
+      res.status(400).json({ error: "trigger and config are required" });
+      return;
+    }
+
+    const id = await createFlowAutomationRule(tenantId, trigger, config);
     res.status(201).json({ id });
   } catch (error) {
     next(error);
