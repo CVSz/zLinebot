@@ -10,10 +10,14 @@ import { webhookRoutes } from "./routes/webhook";
 import { analyticsRoutes } from "./routes/analytics";
 import { stripeWebhook } from "./routes/stripeWebhook";
 import { logsRoutes } from "./routes/logs";
+import { healthRoutes } from "./routes/health";
 import { rateLimitPlugin } from "./plugins/rateLimit";
+import { register, httpRequests } from "./metrics";
+import { initTracer } from "./tracing";
 import { authMiddleware } from "./middleware/auth";
 
 const app = Fastify();
+const tracer = initTracer();
 
 app.register(cors, {
   origin: true,
@@ -24,6 +28,20 @@ app.register(cookie);
 app.register(helmet);
 app.register(rateLimitPlugin);
 app.register(rawBody, { global: false, runFirst: true });
+
+app.addHook("onRequest", async (req: any) => {
+  req.span = tracer.startSpan(req.url);
+});
+
+app.addHook("onResponse", async (req: any) => {
+  httpRequests.inc();
+  if (req.span) req.span.finish();
+});
+
+app.get("/metrics", async (_req, reply) => {
+  reply.header("Content-Type", register.contentType);
+  return register.metrics();
+});
 
 app.register(authRoutes, { prefix: "/auth" });
 app.register(automationRoutes, {
@@ -40,5 +58,6 @@ app.register(logsRoutes, {
   preHandler: authMiddleware
 });
 app.register(stripeWebhook);
+app.register(healthRoutes);
 
 app.listen({ port: 3000, host: "0.0.0.0" });

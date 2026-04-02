@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api
+  namespace: zlinebot
 spec:
   replicas: 3
   selector:
@@ -14,6 +15,21 @@ spec:
     spec:
       containers:
         - name: api
-          image: zlinebot-api
+          image: zlinebot-api:latest
           ports:
             - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: zlinebot-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
