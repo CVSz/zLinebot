@@ -16,11 +16,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup -g 1001 -S nodejs && adduser -S -u 1001 -G nodejs node
-
-COPY --from=builder --chown=node:nodejs /app/package*.json ./
-COPY --from=builder --chown=node:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=node:nodejs /app/dist ./dist
+COPY --from=builder --chown=node:node /app/package*.json ./
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/dist ./dist
 
 EXPOSE 3000
 
