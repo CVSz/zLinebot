@@ -12,6 +12,19 @@ function parsePort(value: string | undefined): number {
   return parsed;
 }
 
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  if (!value || !/^\d+$/.test(value)) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
 function parseBoolean(value: string | undefined, fallback: boolean): boolean {
   if (!value) {
     return fallback;
@@ -47,11 +60,21 @@ const tiktokWebhookSecret = process.env.TIKTOK_WEBHOOK_SECRET?.trim();
 const tiktokScope = process.env.TIKTOK_SCOPE?.trim() || "user.info.basic";
 const tiktokShopApiBaseUrl = process.env.TIKTOK_SHOP_API_BASE_URL?.trim();
 const tiktokShopAccessToken = process.env.TIKTOK_SHOP_ACCESS_TOKEN?.trim();
+const corsOrigin = process.env.CORS_ORIGIN?.trim();
 
 export const env = Object.freeze({
   port: parsePort(process.env.PORT),
+  appUrl: process.env.APP_URL?.trim() || "http://localhost:3000",
   tenantApiKey: process.env.TENANT_API_KEY ?? "demo",
   databaseUrl: requireNonEmpty("DATABASE_URL", process.env.DATABASE_URL),
+  redisUrl: process.env.REDIS_URL?.trim() || "redis://127.0.0.1:6379",
+  jwtSecret: requireNonEmpty("JWT_SECRET", process.env.JWT_SECRET),
+  sessionSecret: requireNonEmpty("SESSION_SECRET", process.env.SESSION_SECRET),
+  corsOrigin: corsOrigin && corsOrigin.length > 0 ? corsOrigin : "*",
+  rateLimit: parsePositiveInt(process.env.RATE_LIMIT, 100),
+  queueConcurrency: parsePositiveInt(process.env.QUEUE_CONCURRENCY, 5),
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY?.trim(),
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET?.trim(),
   lineChannelSecret: lineChannelSecret && lineChannelSecret.length > 0 ? lineChannelSecret : undefined,
   lineChannelAccessToken: lineChannelAccessToken && lineChannelAccessToken.length > 0 ? lineChannelAccessToken : undefined,
   lineDefaultTenantId: defaultTenantId,
