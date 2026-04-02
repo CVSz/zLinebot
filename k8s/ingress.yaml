@@ -1,8 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: zlinebot
+  name: zlinebot-ingress
+  namespace: zlinebot
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - zlinebot.zeaz.dev
+      secretName: zlinebot-tls
   rules:
     - host: zlinebot.zeaz.dev
       http:
@@ -11,6 +21,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: zlinebot
+                name: zlinebot-service
                 port:
-                  number: 80
+                  number: 3000
+          - path: /webhook
+            pathType: Prefix
+            backend:
+              service:
+                name: zlinebot-service
+                port:
+                  number: 3000
