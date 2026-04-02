@@ -1,16 +1,29 @@
 import { Router } from "express";
-import { fetchShowcaseProducts, generateVideoDrafts, listVideoJobs } from "../services/tiktok.shop.js";
+import { readFile } from "fs/promises";
+import {
+  buildShopIntelligenceReport,
+  exportShopIntelligenceCsv,
+  fetchShopUserProfiles,
+  fetchShowcaseProducts,
+  generateVideoDrafts,
+  listVideoJobs
+} from "../services/tiktok.shop.js";
 
 export const adminTikTokRouter = Router();
 
 adminTikTokRouter.get("/admin/tiktok-shop/overview", async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";
-  const products = await fetchShowcaseProducts(tenantId);
+  const [products, userProfiles] = await Promise.all([
+    fetchShowcaseProducts(tenantId),
+    fetchShopUserProfiles(tenantId)
+  ]);
 
   res.json({
     tenantId,
     showcaseCount: products.length,
     showcaseProducts: products,
+    userProfilesCount: userProfiles.length,
+    userProfiles,
     jobs: listVideoJobs(tenantId)
   });
 });
@@ -56,4 +69,22 @@ adminTikTokRouter.post("/admin/tiktok-shop/auto-video", async (req, res) => {
     status: "created",
     job
   });
+});
+
+adminTikTokRouter.get("/admin/tiktok-shop/intelligence", async (req, res) => {
+  const tenantId = req.header("x-tenant-id") ?? "demo";
+  const report = await buildShopIntelligenceReport(tenantId);
+  res.status(200).json(report);
+});
+
+adminTikTokRouter.get("/admin/tiktok-shop/export", async (req, res) => {
+  const tenantId = req.header("x-tenant-id") ?? "demo";
+  const report = await buildShopIntelligenceReport(tenantId);
+  const filePath = await exportShopIntelligenceCsv(report);
+  const content = await readFile(filePath, "utf8");
+  const filename = `tiktok_shop_${tenantId}_${Date.now()}.csv`;
+
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.status(200).send(content);
 });
