@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      FLY_REGISTRY: registry.fly.io/zlinebot
+      FLY_REGISTRY: local/zlinebot
 
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
       - name: Log in to Fly registry
         uses: docker/login-action@v3
         with:
-          registry: registry.fly.io
+          registry: local
           username: zeazdev
           password: ${{ secrets.FLY_API_TOKEN }}
 
