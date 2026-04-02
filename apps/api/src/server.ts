@@ -16,6 +16,7 @@ import { register, httpRequests } from "./metrics";
 import { authMiddleware } from "./middleware/auth";
 
 const app = Fastify();
+const tracer = initTracer();
 
 app.register(cors, {
   origin: true,

@@ -7,6 +7,7 @@ import Products from "./pages/Products";
 import Builder from "./pages/Builder";
 import Automations from "./pages/Automations";
 import Logs from "./pages/Logs";
+import Live from "./pages/Live";
 
 const pages = {
   dashboard: { label: "Dashboard", component: Dashboard },
@@ -16,7 +17,8 @@ const pages = {
   tiktok: { label: "TikTok Shop", component: TikTokShopPanel },
   builder: { label: "Builder", component: Builder },
   automations: { label: "Automations", component: Automations },
-  logs: { label: "Logs", component: Logs }
+  logs: { label: "Logs", component: Logs },
+  live: { label: "Live Events", component: Live }
 };
 
 export default function App() {

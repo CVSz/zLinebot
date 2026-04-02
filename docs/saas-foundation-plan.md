@@ -1,3 +1,5 @@
+> **Documentation Update (2026-04-02):** For the latest repository-wide feature analysis, see `docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`.
+
 # SaaS Foundation Plan
 
 This document captures the incremental approach for evolving zLinebot into a production SaaS platform without a risky full rewrite.

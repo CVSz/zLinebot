@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { consumer } from "@zlinebot/automation/kafka";
 import { executeAutomation } from "./executor";
+import { initWorkerTracer } from "./tracing";
 
 const redisUrl = new URL(process.env.REDIS_URL ?? "redis://redis:6379");
 const queueBackend = (process.env.AUTOMATION_QUEUE_BACKEND ?? "bullmq").toLowerCase();
