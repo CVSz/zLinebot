@@ -10,7 +10,7 @@ MODE="${1:-}"
 LOGFILE="codex_release.log"
 
 if [[ -z "$MODE" ]]; then
-  echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|audit|hyperscale|bootstrap|monitoring}"
+  echo "Usage: codex.sh {basic|full|ultimate|orchestrator|selfheal|watchdog|release|audit|hyperscale|bootstrap|monitoring}"
   exit 1
 fi
 
@@ -38,6 +38,15 @@ case "$MODE" in
     echo "[Codex] Running Master Orchestrator..." | tee -a "$LOGFILE"
     bash zlinebot-master-orchestrator.sh | tee -a "$LOGFILE"
     ;;
+  selfheal)
+    echo "[Codex] Running Self-healing Deployment..." | tee -a "$LOGFILE"
+    bash zlinebot-master-selfheal.sh | tee -a "$LOGFILE"
+    ;;
+  watchdog)
+    echo "[Codex] Starting Watchdog (background)..." | tee -a "$LOGFILE"
+    nohup bash watchdog.sh >> "$LOGFILE" 2>&1 &
+    echo "[Codex] Watchdog started in background." | tee -a "$LOGFILE"
+    ;;
   release)
     echo "[Codex] Executing Final Release Workflow..." | tee -a "$LOGFILE"
     bash install_ultimate.sh | tee -a "$LOGFILE"
@@ -61,7 +70,7 @@ case "$MODE" in
     bash install-monitoring.sh | tee -a "$LOGFILE"
     ;;
   *)
-    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|audit|hyperscale|bootstrap|monitoring}"
+    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|selfheal|watchdog|release|audit|hyperscale|bootstrap|monitoring}"
     exit 1
     ;;
 esac
