@@ -4,13 +4,17 @@ import Billing from "./pages/Billing";
 import TikTokShopPanel from "./pages/TikTokShopPanel";
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
+import Builder from "./pages/Builder";
+import Logs from "./pages/Logs";
 
 const pages = {
   dashboard: { label: "Dashboard", component: Dashboard },
   orders: { label: "Orders", component: Orders },
   products: { label: "Products", component: Products },
   billing: { label: "Billing", component: Billing },
-  tiktok: { label: "TikTok Shop", component: TikTokShopPanel }
+  tiktok: { label: "TikTok Shop", component: TikTokShopPanel },
+  builder: { label: "Builder", component: Builder },
+  logs: { label: "Logs", component: Logs }
 };
 
 export default function App() {

@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { db } from "../db.js";
 import { enqueueAutomationJob } from "../queue/automation.js";
+import { compileFlow } from "../automation/compiler.js";
 
 export type CreateAutomationRuleInput = {
   tenantId: string;
@@ -19,6 +20,19 @@ export async function createAutomationRule(input: CreateAutomationRuleInput): Pr
   );
 
   return id;
+}
+
+export async function createFlowAutomationRule(
+  tenantId: string,
+  trigger: string,
+  flow: Record<string, unknown>
+): Promise<string> {
+  const compiled = compileFlow(flow);
+  return createAutomationRule({
+    tenantId,
+    trigger,
+    action: `flow:${JSON.stringify(compiled)}`
+  });
 }
 
 export async function listAutomationRules(tenantId: string) {

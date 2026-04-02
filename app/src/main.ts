@@ -24,6 +24,7 @@ import { trace } from "./middleware/trace.js";
 import { dsrRouter } from "./routes/dsr.js";
 import { auditRouter } from "./routes/audit.js";
 import { health } from "./health.js";
+import { logsRouter } from "./routes/logs.js";
 import { tiktokRouter } from "./routes/tiktok.js";
 import { adminTikTokRouter } from "./routes/admin.tiktok.js";
 import { configureDQN } from "./rl/dqn.js";
@@ -69,6 +70,7 @@ tenantRouter.use(adminTikTokRouter);
 tenantRouter.use(automationRouter);
 tenantRouter.use(dsrRouter);
 tenantRouter.use(auditRouter);
+tenantRouter.use(logsRouter);
 app.use("/", tenantRouter);
 
 app.use(errorHandler);
