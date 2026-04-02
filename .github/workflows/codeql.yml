@@ -16,6 +16,8 @@ jobs:
       contents: read
       security-events: write
       packages: read
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -29,11 +31,7 @@ jobs:
       - uses: actions/setup-node@v6
         if: matrix.language == 'javascript-typescript'
         with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: |
-            app/package-lock.json
-            admin/package-lock.json
+          node-version: 24
       - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
