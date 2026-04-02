@@ -42,7 +42,28 @@ initializeMultiAgentRewardSystem();
 configureDQN({ stateDim: 256 });
 
 app.use(helmet());
-app.use(cors({ origin: env.corsOrigin === "*" ? true : env.corsOrigin }));
+const allowedCorsOrigins = env.corsOrigin
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0 && origin !== "*");
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedCorsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    }
+  })
+);
 app.use(trace);
 app.use(rateLimit);
 

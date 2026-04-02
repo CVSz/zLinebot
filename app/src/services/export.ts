@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir, mkdtemp, writeFile } from "fs/promises";
 import { randomUUID } from "crypto";
 import path from "path";
 import { db } from "../db.js";
@@ -16,9 +16,6 @@ function escapeCsv(value: string) {
   return `"${escaped}"`;
 }
 
-function safePathToken(value: string) {
-  return value.replace(/[^a-zA-Z0-9_-]/g, "_");
-}
 
 export async function exportLedger(tenantId: string) {
   const result = await db.query<LedgerRow>(
@@ -40,9 +37,10 @@ export async function exportLedger(tenantId: string) {
     ].join(",");
   });
 
-  const exportDir = process.env.EXPORT_DIR ?? "/tmp/exports";
-  await mkdir(exportDir, { recursive: true });
+  const exportRoot = process.env.EXPORT_DIR ?? "/tmp";
+  await mkdir(exportRoot, { recursive: true, mode: 0o700 });
 
+  const exportDir = await mkdtemp(path.join(exportRoot, "ledger_export_"));
   const filePath = path.join(exportDir, `ledger_${Date.now()}_${randomUUID()}.csv`);
   await writeFile(filePath, [header, ...lines].join("\n"), "utf8");
 
