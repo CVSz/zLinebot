@@ -1,4 +1,3 @@
-**copilot-instructions.md**  
 **Master Meta Full Final Release – End-to-End Guide for zLinebot**  
 **Version**: 1.0 (Final Release)  
 **Repository**: https://github.com/CVSz/zLinebot  
