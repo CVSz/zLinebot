@@ -24,7 +24,7 @@ fi
 cd zLinebot
 cp .env.example .env 2>/dev/null || true
 
-npm install --prefix app
+ONNXRUNTIME_NODE_INSTALL=skip npm install --prefix app --ignore-scripts
 pip install torch shap Pyfhel scikit-learn
 
 kubectl apply -f k8s/core.yaml
