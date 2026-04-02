@@ -12,6 +12,7 @@ import { stripeWebhook } from "./routes/stripeWebhook";
 import { logsRoutes } from "./routes/logs";
 import { healthRoutes } from "./routes/health";
 import { rateLimitPlugin } from "./plugins/rateLimit";
+import { register, httpRequests } from "./metrics";
 import { authMiddleware } from "./middleware/auth";
 
 const app = Fastify();
@@ -25,6 +26,15 @@ app.register(cookie);
 app.register(helmet);
 app.register(rateLimitPlugin);
 app.register(rawBody, { global: false, runFirst: true });
+
+app.addHook("onResponse", async () => {
+  httpRequests.inc();
+});
+
+app.get("/metrics", async (_req, reply) => {
+  reply.header("Content-Type", register.contentType);
+  return register.metrics();
+});
 
 app.register(authRoutes, { prefix: "/auth" });
 app.register(automationRoutes, {

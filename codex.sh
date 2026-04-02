@@ -47,8 +47,12 @@ case "$MODE" in
     echo "[Codex] Running full server bootstrap (k3s + TLS + deploy)..." | tee -a $LOGFILE
     bash bootstrap.sh | tee -a $LOGFILE
     ;;
+  monitoring)
+    echo "[Codex] Installing monitoring stack..." | tee -a $LOGFILE
+    bash install-monitoring.sh | tee -a $LOGFILE
+    ;;
   *)
-    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|hyperscale|bootstrap}"
+    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|hyperscale|bootstrap|monitoring}"
     exit 1
     ;;
 esac
