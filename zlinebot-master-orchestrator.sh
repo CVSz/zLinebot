@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # zLinebot MASTER META ORCHESTRATOR – FINAL RELEASE (v2026.04.03)
-# Full integration: Secure .env + Kafka KRaft + Cloudflare Named Tunnel + Domain zlinebot.zeaz.dev
+# Full integration: Secure .env + Kafka KRaft + Cloudflare Named Tunnel + Domain
 # ==============================================================================
 set -euo pipefail
 
@@ -11,6 +11,20 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
+
+check_docker() {
+  if ! command -v docker >/dev/null 2>&1; then
+    log "❌ Docker not found in PATH. Install Docker Engine + Compose plugin, then retry."
+    exit 1
+  fi
+
+  if ! docker compose version >/dev/null 2>&1; then
+    log "❌ Docker Compose v2 plugin not found. Install docker-compose-plugin, then retry."
+    exit 1
+  fi
+
+  log "✅ Docker + Compose ready"
+}
 
 setup_cloudflare_tunnel() {
   log "🚀 Setting up Cloudflare Named Tunnel for ${DOMAIN}"
@@ -41,6 +55,7 @@ validate_secrets() {
 main() {
   case "${MODE}" in
     docker-full|full-e2e)
+      check_docker
       validate_secrets
       setup_cloudflare_tunnel
 
