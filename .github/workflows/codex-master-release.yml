@@ -7,15 +7,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   validate:
-    name: Environment Validation
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
       - run: docker --version
@@ -24,54 +18,31 @@ jobs:
       - run: kubectl version --client || echo "Skipping kubeval"
 
   lint:
-    name: Lint & Security Scan
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Install app dependencies
-        run: npm ci --ignore-scripts
-        working-directory: app
-      - name: Type-check backend
-        run: npm run build
-        working-directory: app
+      - run: npm install && npx eslint .
       - run: pip install pylint && pylint **/*.py || true
       - run: shellcheck **/*.sh || true
       - run: pip install bandit && bandit -r .
       - run: docker run --rm -i hadolint/hadolint < Dockerfile
-      - name: Validate Kubernetes manifests
-        run: |
-          set -euo pipefail
-          KUBEVAL_URL="https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz"
-          if curl -fsSL -o kubeval.tar.gz "$KUBEVAL_URL"; then
-            tar -xzf kubeval.tar.gz
-            ./kubeval k8s/*.yaml || true
-          else
-            echo "Skipping kubeval: unable to download binary"
-          fi
+      - run: |
+          curl -s https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz | tar xz
+          ./kubeval k8s/*.yaml || true
 
   test:
-    name: Unit & Integration Tests
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci --ignore-scripts
-        working-directory: app
+      - run: npm install
       - run: npm test -- --coverage
-        working-directory: app
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: app/coverage/lcov.info
+          path: coverage/lcov.info
 
   build:
-    name: Build & Package
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t zlinebot:latest .
@@ -82,67 +53,30 @@ jobs:
           path: zlinebot.tar.gz
 
   deploy:
-    name: Multi-Environment Deployment
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to Fly.io
-        if: ${{ secrets.FLY_API_TOKEN != '' }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-          curl -fsSL https://fly.io/install.sh | sh
-          export FLYCTL_INSTALL="/home/runner/.fly"
-          export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy --remote-only
-      - name: Deploy to Kubernetes Cluster
-        if: ${{ secrets.KUBE_CONFIG_DATA != '' }}
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-        run: |
-          mkdir -p ~/.kube
-          echo "$KUBE_CONFIG_DATA" | base64 --decode > ~/.kube/config
-          kubectl apply -f k8s/
-      - name: Deploy to Cloudflare Workers
-        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npm install -g wrangler
-          wrangler deploy
+      - run: flyctl deploy --remote-only
+      - run: kubectl apply -f k8s/
+      - run: wrangler publish
 
   versioning:
-    name: Auto Versioning & Changelog
     runs-on: ubuntu-latest
     needs: [lint, test, build]
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
-      - name: Install Semantic Release
-        run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github
-      - name: Run Semantic Release
-        env:
+      - run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github
+      - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: semantic-release
 
   release:
-    name: Final Release
     runs-on: ubuntu-latest
     needs: [validate, lint, test, build, deploy, versioning]
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Collect Release Notes
-        run: |
+      - run: |
           if [ -f CHANGELOG.md ]; then
             cp CHANGELOG.md RELEASE_NOTES.md
           else
@@ -155,8 +89,7 @@ jobs:
             RELEASE_NOTES.md
             coverage/lcov.info
             zlinebot.tar.gz
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             RELEASE_NOTES.md
