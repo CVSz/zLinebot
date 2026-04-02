@@ -1,121 +1,132 @@
 # 🚀 zLinebot
 
-### AI-Native Platform for Intelligent Messaging, Personalization, and Distributed Systems
-**From LINE Bot → AI → ML → Web3 → Cloud Infrastructure (All-in-One Stack)**
+### AI-Native Super Platform for Messaging, Intelligence, and Distributed Systems
+**From LINE Bot → AI → ML → Data → Web3 → Cloud Infrastructure (All-in-One Ecosystem)**
 
 ---
 
 <p align="center">
-  <img src="https://img.shields.io/badge/AI-Platform-blueviolet" />
+  <img src="https://img.shields.io/badge/AI-Native-blueviolet" />
+  <img src="https://img.shields.io/badge/Fullstack-Platform-black" />
   <img src="https://img.shields.io/badge/Node.js-TypeScript-green" />
   <img src="https://img.shields.io/badge/Python-ML-yellow" />
   <img src="https://img.shields.io/badge/Kubernetes-Cloud--Native-blue" />
   <img src="https://img.shields.io/badge/Cloudflare-Edge-orange" />
-  <img src="https://img.shields.io/badge/Web3-Smart%20Contracts-black" />
+  <img src="https://img.shields.io/badge/Web3-SmartContracts-black" />
+  <img src="https://img.shields.io/badge/Status-Production--Ready-success" />
   <img src="https://img.shields.io/badge/License-MIT-brightgreen" />
 </p>
 
 ---
 
 > **zLinebot is not just a chatbot.**
-> It is a **full-stack AI platform** that combines LINE messaging, machine learning, data systems, and cloud-native infrastructure into one unified architecture.
+> It is a **full-stack AI-native platform** that unifies messaging, machine learning, data infrastructure, and cloud systems into one scalable architecture.
 
 ---
 
-## ⚡ One-Liner
+## ⚡ Executive Summary
 
-> Build intelligent, scalable, AI-powered systems with LINE as the frontend and a full distributed stack behind it.
+zLinebot is designed as an **AI-first distributed system**:
+- LINE is the user interaction surface.
+- Backend services orchestrate workflows and APIs.
+- ML services power ranking, personalization, and automation.
+- Cloud-native infrastructure enables scale and reliability.
 
 ---
 
-## 🇬🇧 English
+## 🧠 ภาพรวมระบบ
 
-### 🧠 About the Platform
+zLinebot คือแพลตฟอร์ม AI แบบ Full-stack ที่รวม:
 
-zLinebot is a full-stack AI platform that combines:
+- 🤖 LINE Bot (Frontend Interface)
+- ⚙️ Backend (Node.js + TypeScript)
+- 🧠 Machine Learning (Python)
+- 📊 Data Platform (SQL + Feature Store + Warehouse)
+- 🌐 Cloud-native Infrastructure (Docker, Kubernetes, Cloudflare)
+- ⛓ Web3 (Smart Contracts)
 
-- 🤖 LINE Bot (frontend conversational interface)
-- ⚙️ Backend services (Node.js + TypeScript)
-- 🧠 Machine Learning services (Python)
-- 📊 Data platform (SQL + analytics/feature systems)
-- 🌐 Cloud-native infrastructure (Docker, Kubernetes, Cloudflare)
-- ⛓ Web3 integrations (smart contracts)
+---
 
-### 🏗 Architecture Overview
+## 🏗 System Architecture
+
+> Mermaid ด้านล่างปรับให้เป็น GitHub-safe syntax (text-only labels) เพื่อเลี่ยง parse error.
 
 ```mermaid
 flowchart TD
 
-User[👤 User] --> LINE[📱 LINE Messaging API]
-LINE --> CF[☁️ Cloudflare Worker / Edge]
-CF --> APP[⚙️ Backend (Node.js / TS)]
+User[User] --> LINE[LINE Messaging API]
+LINE --> EDGE[Cloudflare Edge]
+EDGE --> APP[Backend Services Node.js TS]
 
-APP --> DB[(🗄 Database)]
-APP --> API[🔌 External APIs]
+APP --> DB[Database Layer]
+APP --> API[External APIs]
 
-APP --> ML[🧠 ML Services (Python)]
-ML --> MODEL[📊 Models: RL / Ranking / Anomaly]
+APP --> ML[ML Services Python]
+ML --> MODEL[Models RL Ranking Anomaly]
 
-APP --> FLINK[🌊 Stream Processing]
-FLINK --> WH[(🏢 Data Warehouse)]
+APP --> STREAM[Flink Stream]
+STREAM --> WH[Data Warehouse]
 
-APP --> ADMIN[🖥 Admin Dashboard]
-APP --> MOBILE[📱 Mobile App]
+APP --> ADMIN[Admin Dashboard]
+APP --> MOBILE[Mobile App]
+APP --> WEB3[Smart Contracts]
 
-APP --> WEB3[⛓ Smart Contracts]
-
-subgraph Infra
-DOCKER[🐳 Docker]
-K8S[☸️ Kubernetes]
-ISTIO[🔀 Service Mesh]
-TF[🏗 Terraform]
+subgraph INFRA
+DOCKER[Docker]
+K8S[Kubernetes]
+MESH[Service Mesh]
+TF[Terraform]
 end
 
 APP --> DOCKER
 DOCKER --> K8S
-K8S --> ISTIO
+K8S --> MESH
 K8S --> TF
 ```
 
-### 🛠 Tech Stack
+---
 
-#### Backend
+## 🛠 Technology Stack
+
+### Backend
 - Node.js (TypeScript) → `app/`
 - Cloudflare Workers → `cloudflare/`
 
-#### Frontend
+### Frontend
 - Admin Dashboard (Vite/React) → `admin/`
 - Mobile App (React Native) → `mobile/`
 
-#### AI / ML
-- Python services and experiments → `ml/`
-- RL, ranking, federated learning, explainable AI
+### AI / ML
+- Python ML services → `ml/`
+- RL, ranking, federated learning, explainability
 
-#### Data
+### Data
 - SQL schemas → `db/`
 - Warehouse assets → `warehouse/`
 - Stream processing jobs → `flink/`
 
-#### Infrastructure
+### Infrastructure
 - Docker / Compose → `docker/`
 - Kubernetes manifests → `k8s/`
 - Terraform → `infra/`
 - Nginx gateway → `nginx/`
 
-#### Web3
+### Web3
 - Solidity contracts → `contracts/`
 
-### 📁 Project Structure
+---
+
+## 📁 Project Structure
 
 ```text
 zLinebot/
-├── app/            # Backend services
-├── admin/          # Dashboard
-├── mobile/         # Mobile app
-├── ml/             # AI models
+├── app/            # Backend services (Node.js / TS)
+├── admin/          # Dashboard (Vite/React)
+├── mobile/         # Mobile app (React Native)
+├── ml/             # AI / ML pipelines
 ├── db/             # Database schemas
-├── warehouse/      # Analytics
-├── flink/          # Streaming jobs
+├── warehouse/      # Analytics warehouse
+├── flink/          # Stream processing
 ├── contracts/      # Smart contracts
 ├── cloudflare/     # Edge workers
 ├── cloud/          # Worker services
@@ -127,15 +138,21 @@ zLinebot/
 └── nginx/          # Gateway
 ```
 
-### ⚡ Highlights
+---
 
-- 🔥 Full-stack AI platform (not only a bot)
-- 🧠 AI-first architecture
-- 🌐 End-to-end flow: Edge → Cloud → ML → Data
-- ⚙️ Modular and scalable design
-- 🚀 Production-ready infrastructure path (K8s + Service Mesh)
+## ⚡ Key Capabilities
 
-### 🎯 Use Cases
+- Intelligent LINE chatbot interface
+- AI-driven personalization and decision systems
+- Distributed microservices backend
+- Edge-to-cloud execution model
+- Real-time and batch data processing
+- Privacy-first ML direction
+- Web3 integration layer
+
+---
+
+## 🎯 Use Cases
 
 - LINE AI Chatbot
 - Recommendation System
@@ -143,95 +160,42 @@ zLinebot/
 - AI SaaS
 - Web3 + AI Integration
 
-### 🔮 Future Direction
+---
 
-- LLM / AI Agents
+## 🚀 Deployment Options
+
+- Local development (Docker Compose)
+- Cloud deployment (Fly.io / Cloudflare)
+- Kubernetes cluster (production scale)
+- Edge deployment (Cloudflare Workers)
+
+---
+
+## 🔮 Roadmap
+
+- LLM / AI Agent integration
 - Real-time personalization
-- Privacy-preserving AI (FHE / Federated)
-- Tokenized ecosystem
+- Privacy-preserving AI (federated + FHE-ready)
+- Multi-region distributed deployment
+- Tokenized AI ecosystem
 
 ---
 
-## 🇹🇭 ภาษาไทย
+## 🤝 Contributing
 
-### 🧠 ภาพรวมแพลตฟอร์ม
+Contributions are welcome across backend, ML, infrastructure, and docs.
 
-zLinebot คือแพลตฟอร์ม AI แบบ Full-stack ที่รวม:
-
-- 🤖 LINE Bot (ช่องทางสนทนาฝั่งผู้ใช้)
-- ⚙️ Backend services (Node.js + TypeScript)
-- 🧠 บริการ Machine Learning (Python)
-- 📊 Data platform (SQL + ระบบ analytics/feature)
-- 🌐 โครงสร้างพื้นฐานแบบ Cloud-native (Docker, Kubernetes, Cloudflare)
-- ⛓ การเชื่อมต่อ Web3 (Smart Contracts)
-
-### 🏗 ภาพรวมสถาปัตยกรรม
-
-สถาปัตยกรรมใช้งานแบบครบวงจรตั้งแต่ผู้ใช้บน LINE ผ่าน Edge ไปยัง backend, ML, data pipeline และ infrastructure สำหรับ production ตามแผนภาพด้านบน.
-
-### 🛠 เทคสแตก
-
-#### Backend
-- Node.js (TypeScript) → `app/`
-- Cloudflare Workers → `cloudflare/`
-
-#### Frontend
-- Admin Dashboard (Vite/React) → `admin/`
-- Mobile App (React Native) → `mobile/`
-
-#### AI / ML
-- Python services และงานทดลองโมเดล → `ml/`
-- รองรับ RL, ranking, federated learning, explainable AI
-
-#### Data
-- SQL schemas → `db/`
-- งาน warehouse → `warehouse/`
-- งาน stream processing → `flink/`
-
-#### Infrastructure
-- Docker / Compose → `docker/`
-- Kubernetes → `k8s/`
-- Terraform → `infra/`
-- Nginx → `nginx/`
-
-#### Web3
-- Solidity → `contracts/`
-
-### ⚡ จุดเด่น
-
-- 🔥 เป็นแพลตฟอร์ม AI แบบ Full-stack (ไม่ใช่แค่ bot)
-- 🧠 วางสถาปัตยกรรมแบบ AI-first
-- 🌐 ครบทั้ง Edge → Cloud → ML → Data
-- ⚙️ โครงสร้างแยกส่วน ช่วยให้ขยายระบบได้ง่าย
-- 🚀 พร้อมต่อยอดสู่ production (K8s + Service Mesh)
-
-### 🎯 ตัวอย่างการใช้งาน
-
-- LINE AI Chatbot
-- Recommendation System
-- Automation Platform
-- AI SaaS
-- Web3 + AI Integration
-
-### 🔮 ทิศทางในอนาคต
-
-- LLM / AI Agents
-- การทำ personalization แบบ real-time
-- Privacy AI (FHE / Federated)
-- ระบบนิเวศแบบ tokenized
-
----
-
-## 📚 Additional Documentation
-
-- Thai docs entry: [docs/README_th.md](docs/README_th.md)
-- Full structure guide: [docs/REPO_STRUCTURE.md](docs/REPO_STRUCTURE.md)
-- Installation guide: [docs/INSTALL_FULL.md](docs/INSTALL_FULL.md)
-- Product proposal: [docs/PROPOSAL_FULL.md](docs/PROPOSAL_FULL.md)
-- Master CI/CD guide: [docs/CI_CD_MASTER_META.md](docs/CI_CD_MASTER_META.md)
+- Contribution guide: `docs/CONTRIBUTING_th.md`
+- Security policy: `SECURITY.md`
 
 ---
 
 ## 📄 License
 
 MIT License
+
+---
+
+## 🌍 Vision
+
+> Build an AI-native infrastructure layer where messaging, intelligence, and distributed systems converge into one platform.
