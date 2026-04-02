@@ -7,10 +7,15 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     name: Environment Validation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - run: docker --version
@@ -21,6 +26,8 @@ jobs:
   lint:
     name: Lint & Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Install app dependencies
@@ -40,6 +47,8 @@ jobs:
   test:
     name: Unit & Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - run: npm ci --ignore-scripts
@@ -54,6 +63,8 @@ jobs:
   build:
     name: Build & Package
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t zlinebot:latest .
@@ -67,6 +78,8 @@ jobs:
     name: Multi-Environment Deployment
     runs-on: ubuntu-latest
     needs: [build]
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Deploy to Fly.io
@@ -80,6 +93,10 @@ jobs:
     name: Auto Versioning & Changelog
     runs-on: ubuntu-latest
     needs: [lint, test, build]
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - name: Install Semantic Release
@@ -93,6 +110,8 @@ jobs:
     name: Final Release
     runs-on: ubuntu-latest
     needs: [validate, lint, test, build, deploy, versioning]
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Collect Release Notes
