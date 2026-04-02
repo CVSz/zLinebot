@@ -10,6 +10,7 @@ import { webhookRoutes } from "./routes/webhook";
 import { analyticsRoutes } from "./routes/analytics";
 import { stripeWebhook } from "./routes/stripeWebhook";
 import { logsRoutes } from "./routes/logs";
+import { healthRoutes } from "./routes/health";
 import { rateLimitPlugin } from "./plugins/rateLimit";
 import { authMiddleware } from "./middleware/auth";
 
@@ -40,5 +41,6 @@ app.register(logsRoutes, {
   preHandler: authMiddleware
 });
 app.register(stripeWebhook);
+app.register(healthRoutes);
 
 app.listen({ port: 3000, host: "0.0.0.0" });
