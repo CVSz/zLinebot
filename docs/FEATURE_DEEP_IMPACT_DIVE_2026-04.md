@@ -126,3 +126,15 @@ zLinebot has evolved from a LINE bot into a **multi-layer AI commerce and automa
 - Keep tactical runbooks in their original docs (install/admin/user/security/etc.).
 - Update this report whenever major domains change (new channel, model tier, data stack, or governance model).
 
+
+---
+
+## 7) Automated Audit + Scan Command
+
+You can generate a repository-wide meta audit report with:
+
+```bash
+bash codex.sh audit
+```
+
+This runs the deep-impact audit with a full project lint/build scan and produces `reports/deep_impact_audit_report.md` containing domain footprint metrics, shell script lint findings, high-signal secret-pattern scan results, and full-scan output.
