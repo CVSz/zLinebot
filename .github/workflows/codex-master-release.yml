@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install
       - run: npm test -- --coverage
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage/lcov.info
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker build -t zlinebot:latest .
       - run: docker save zlinebot:latest | gzip > zlinebot.tar.gz
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: zlinebot-docker
           path: zlinebot.tar.gz
@@ -82,7 +82,7 @@ jobs:
           else
             echo "Codex Final Release - April 2026" > RELEASE_NOTES.md
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: codex-release
           path: |
