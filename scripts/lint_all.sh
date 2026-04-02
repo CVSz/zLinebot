@@ -6,6 +6,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 echo "==> Linting Python (ruff)"
+if ! python3 -m ruff --version >/dev/null 2>&1; then
+  echo "ruff not found; installing into current Python environment"
+  python3 -m pip install --upgrade pip ruff
+fi
 python3 -m ruff check ml scripts
 
 echo "==> Type-checking backend (TypeScript)"
