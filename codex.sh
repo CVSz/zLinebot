@@ -39,6 +39,10 @@ case "$MODE" in
     bash zlinebot-master-orchestrator.sh | tee -a $LOGFILE
     echo "[Codex] Release build complete. Artifacts logged in $LOGFILE"
     ;;
+  master)
+    echo "[Codex] Running single-node production master installer..." | tee -a $LOGFILE
+    bash zlinebot-master.sh | tee -a $LOGFILE
+    ;;
   hyperscale)
     echo "[Codex] Executing Hyperscale Kubernetes Deployment..." | tee -a $LOGFILE
     bash deploy-k8s.sh | tee -a $LOGFILE
@@ -56,7 +60,7 @@ case "$MODE" in
     bash install-observability.sh | tee -a $LOGFILE
     ;;
   *)
-    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|hyperscale|bootstrap|monitoring|observability}"
+    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|master|hyperscale|bootstrap|monitoring|observability}"
     exit 1
     ;;
 esac
