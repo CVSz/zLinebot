@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { readFile } from "fs/promises";
 import {
   buildShopIntelligenceReport,
   exportShopIntelligenceCsv,
@@ -80,8 +79,7 @@ adminTikTokRouter.get("/admin/tiktok-shop/intelligence", async (req, res) => {
 adminTikTokRouter.get("/admin/tiktok-shop/export", async (req, res) => {
   const tenantId = req.header("x-tenant-id") ?? "demo";
   const report = await buildShopIntelligenceReport(tenantId);
-  const filePath = await exportShopIntelligenceCsv(report);
-  const content = await readFile(filePath, "utf8");
+  const content = exportShopIntelligenceCsv(report);
   const filename = `tiktok_shop_${tenantId}_${Date.now()}.csv`;
 
   res.setHeader("Content-Type", "text/csv; charset=utf-8");

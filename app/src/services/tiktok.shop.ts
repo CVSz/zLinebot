@@ -1,6 +1,4 @@
 import crypto from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { db } from "../db.js";
 import { generateReply } from "./ai.js";
 import { env } from "../utils/env.js";
@@ -243,11 +241,7 @@ function escapeCsv(value: string): string {
   return `"${escaped}"`;
 }
 
-export async function exportShopIntelligenceCsv(report: ShopIntelligenceReport): Promise<string> {
-  const exportDir = process.env.EXPORT_DIR ?? "/tmp/exports";
-  await mkdir(exportDir, { recursive: true });
-
-  const filePath = path.join(exportDir, `tiktok_shop_report_${Date.now()}_${crypto.randomUUID()}.csv`);
+export function exportShopIntelligenceCsv(report: ShopIntelligenceReport): string {
   const lines: string[] = [];
 
   lines.push(["section", "id", "name", "description", "price", "stock", "source"].join(","));
@@ -283,8 +277,7 @@ export async function exportShopIntelligenceCsv(report: ShopIntelligenceReport):
   lines.push(["section", "ai_summary"].join(","));
   lines.push([escapeCsv("insight"), escapeCsv(report.aiSummary)].join(","));
 
-  await writeFile(filePath, lines.join("\n"), "utf8");
-  return filePath;
+  return lines.join("\n");
 }
 
 function parseHashtags(script: string): string[] {
