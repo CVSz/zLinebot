@@ -39,8 +39,24 @@ case "$MODE" in
     bash zlinebot-master-orchestrator.sh | tee -a $LOGFILE
     echo "[Codex] Release build complete. Artifacts logged in $LOGFILE"
     ;;
+  hyperscale)
+    echo "[Codex] Executing Hyperscale Kubernetes Deployment..." | tee -a $LOGFILE
+    bash deploy-k8s.sh | tee -a $LOGFILE
+    ;;
+  bootstrap)
+    echo "[Codex] Running full server bootstrap (k3s + TLS + deploy)..." | tee -a $LOGFILE
+    bash bootstrap.sh | tee -a $LOGFILE
+    ;;
+  monitoring)
+    echo "[Codex] Installing monitoring stack..." | tee -a $LOGFILE
+    bash install-monitoring.sh | tee -a $LOGFILE
+    ;;
+  observability)
+    echo "[Codex] Installing tracing + logging stack..." | tee -a $LOGFILE
+    bash install-observability.sh | tee -a $LOGFILE
+    ;;
   *)
-    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release}"
+    echo "Usage: codex.sh {basic|full|ultimate|orchestrator|release|hyperscale|bootstrap|monitoring|observability}"
     exit 1
     ;;
 esac
