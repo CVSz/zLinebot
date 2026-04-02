@@ -15,7 +15,7 @@ jobs:
       NODE_OPTIONS: "--dns-result-order=ipv4first"
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Python
         uses: actions/setup-python@v5
