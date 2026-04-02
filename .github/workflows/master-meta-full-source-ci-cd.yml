@@ -38,11 +38,11 @@ jobs:
         run: ./scripts/master_meta_full_source_ci_cd.sh ci
 
   cd:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.FLY_API_TOKEN != ''
     needs: ci
     runs-on: ubuntu-latest
     env:
-      FLY_REGISTRY: local/zlinebot
+      FLY_REGISTRY: registry.fly.io/zlinebot
     steps:
       - name: Checkout
         uses: actions/checkout@v5
