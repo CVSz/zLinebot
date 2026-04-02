@@ -1,3 +1,5 @@
+> **Documentation Update (2026-04-02):** For the latest repository-wide feature analysis, see `docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`.
+
 # Master Meta Full Final Release – End-to-End Guide for zLinebot
 
 **Version**: 1.3 (Expanded Release – LINE Bot Monitoring Tools)  
