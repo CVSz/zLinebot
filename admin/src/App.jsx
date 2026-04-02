@@ -5,6 +5,7 @@ import TikTokShopPanel from "./pages/TikTokShopPanel";
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Builder from "./pages/Builder";
+import Automations from "./pages/Automations";
 import Logs from "./pages/Logs";
 
 const pages = {
@@ -14,6 +15,7 @@ const pages = {
   billing: { label: "Billing", component: Billing },
   tiktok: { label: "TikTok Shop", component: TikTokShopPanel },
   builder: { label: "Builder", component: Builder },
+  automations: { label: "Automations", component: Automations },
   logs: { label: "Logs", component: Logs }
 };
 
