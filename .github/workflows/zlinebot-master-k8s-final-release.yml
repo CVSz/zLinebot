@@ -63,16 +63,24 @@ jobs:
           version: latest
 
       - name: Configure kubeconfig
+        if: ${{ secrets.KUBECONFIG != '' }}
         run: |
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > "$HOME/.kube/config"
           kubectl config current-context
 
+      - name: Skip deployment when kubeconfig is missing
+        if: ${{ secrets.KUBECONFIG == '' }}
+        run: echo "KUBECONFIG secret not set, skipping Kubernetes deployment."
+
       - name: Update deployment image (rolling update)
+        if: ${{ secrets.KUBECONFIG != '' }}
         run: |
           kubectl set image deployment/zlinebot-core zlinebot-app=ghcr.io/${IMAGE_OWNER}/zlinebot:${{ github.sha }} -n zlinebot
           kubectl rollout status deployment/zlinebot-core -n zlinebot --timeout=300s
 
       - name: Verify deployment
+        if: ${{ secrets.KUBECONFIG != '' }}
         run: |
           kubectl get pods -n zlinebot
           kubectl get ingress -n zlinebot
