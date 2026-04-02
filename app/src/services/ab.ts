@@ -9,7 +9,7 @@ type ExperimentRecord = {
 };
 
 function getBucket(userId: string, experimentId: string) {
-  const hash = crypto.createHash("md5").update(`${userId}:${experimentId}`).digest("hex");
+  const hash = crypto.createHash("sha256").update(`${userId}:${experimentId}`).digest("hex");
   return parseInt(hash.slice(0, 8), 16) % 100;
 }
 
