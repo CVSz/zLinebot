@@ -1,10 +1,33 @@
+import hashlib
+import os
+from pathlib import Path
+
 import torch
 from train import RankNet
 
 
-def export_onnx():
+MODEL_PATH = Path("model.pt")
+
+
+def _verify_model_file(path: Path) -> None:
+    if not path.exists():
+        raise FileNotFoundError(f"Model file not found: {path}")
+
+    expected_sha256 = os.getenv("MODEL_PT_SHA256")
+    if not expected_sha256:
+        return
+
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != expected_sha256:
+        raise ValueError("model.pt checksum mismatch")
+
+
+def export_onnx() -> None:
+    _verify_model_file(MODEL_PATH)
+
     model = RankNet(384)
-    model.load_state_dict(torch.load("model.pt", map_location="cpu"))
+    state_dict = torch.load(MODEL_PATH, map_location="cpu", weights_only=True)
+    model.load_state_dict(state_dict)
     model.eval()
 
     dummy_q = torch.randn(1, 384)

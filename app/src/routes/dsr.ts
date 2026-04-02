@@ -32,6 +32,10 @@ dsrRouter.post("/privacy/consent", dsrLimiter, async (req, res) => {
 
 dsrRouter.get("/privacy/consent/:userId", dsrLimiter, async (req, res) => {
   const userId = req.params.userId;
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+
   const result = await db.query(
     "SELECT purpose, granted, version, updated_at FROM consents WHERE user_id = $1 ORDER BY purpose",
     [pseudo(userId)]
