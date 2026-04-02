@@ -1,3 +1,5 @@
+> **Documentation Update (2026-04-02):** For the latest repository-wide feature analysis, see `docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`.
+
 # 🚀 zLinebot
 
 ### AI-Native Super Platform for Messaging, Intelligence, and Distributed Systems
@@ -226,3 +228,13 @@ MIT License
 ## 🌍 Vision
 
 > Build an AI-native infrastructure layer where messaging, intelligence, and distributed systems converge into one platform.
+---
+
+## 🔎 Deep Impact Dive (April 2026)
+
+A full cross-repository feature impact analysis is now available at:
+
+- `docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`
+
+This analysis maps capabilities to business and operational outcomes, risk profile, and recommended high-ROI roadmap actions.
+
