@@ -10,6 +10,7 @@ DOMAIN="${DOMAIN:-zlinebot.zeaz.dev}"
 EMAIL="${EMAIL:-admin@zeaz.dev}"
 NAMESPACE="${NAMESPACE:-zlinebot}"
 K3S_KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
+K3S_WAIT_TIMEOUT="${K3S_WAIT_TIMEOUT:-300}"
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "Please run as root (use sudo)."
@@ -66,10 +67,35 @@ fi
 
 export KUBECONFIG="$K3S_KUBECONFIG"
 echo "⏳ Waiting for Kubernetes API..."
-until kubectl get nodes >/dev/null 2>&1; do
-  echo "Waiting for k3s..."
-  sleep 5
-done
+
+wait_for_k3s_api() {
+  local timeout="${1}"
+  local start_ts now elapsed
+  start_ts="$(date +%s)"
+  while true; do
+    if kubectl get nodes >/dev/null 2>&1; then
+      return 0
+    fi
+    now="$(date +%s)"
+    elapsed=$((now - start_ts))
+    if [[ "$elapsed" -ge "$timeout" ]]; then
+      return 1
+    fi
+    echo "Waiting for k3s... (${elapsed}s/${timeout}s)"
+    sleep 5
+  done
+}
+
+if ! wait_for_k3s_api "$K3S_WAIT_TIMEOUT"; then
+  echo "⚠️ Kubernetes API not ready after ${K3S_WAIT_TIMEOUT}s. Attempting to restart k3s once..."
+  systemctl restart k3s || true
+  if ! wait_for_k3s_api "$K3S_WAIT_TIMEOUT"; then
+    echo "❌ Kubernetes API did not become ready after retry."
+    systemctl --no-pager --full status k3s || true
+    journalctl -u k3s --no-pager -n 100 || true
+    exit 1
+  fi
+fi
 echo "✅ Kubernetes is ready"
 
 systemctl enable k3s || true
