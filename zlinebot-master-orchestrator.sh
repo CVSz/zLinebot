@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # zLinebot MASTER META ORCHESTRATOR – FINAL RELEASE (v2026.04.03)
-# Full integration: Secure .env + Kafka KRaft + Cloudflare Named Tunnel + Domain
+# Full integration: deploy.sh + secure .env + Cloudflare Named Tunnel + domain
 # ==============================================================================
 set -euo pipefail
 
@@ -48,6 +48,8 @@ validate_secrets() {
     # shellcheck disable=SC1091
     source .env
     [[ -n "${LINE_CHANNEL_SECRET:-}" && ${#LINE_CHANNEL_SECRET} -ge 32 ]] || { log "❌ Weak LINE secret"; exit 1; }
+    [[ -n "${JWT_SECRET:-}" && ${#JWT_SECRET} -ge 64 ]] || { log "❌ Weak JWT secret"; exit 1; }
+    [[ -n "${TIKTOK_WEBHOOK_SECRET:-}" && ${#TIKTOK_WEBHOOK_SECRET} -ge 32 ]] || { log "❌ Weak TikTok webhook secret"; exit 1; }
     log "✅ Secure .env validated"
   fi
 }
@@ -56,18 +58,21 @@ main() {
   case "${MODE}" in
     docker-full|full-e2e)
       check_docker
-      validate_secrets
-      setup_cloudflare_tunnel
 
-      log "=== Starting zLinebot Full Stack for ${DOMAIN} ==="
-      docker compose down --remove-orphans || true
-      docker compose up -d --build
+      log "=== Running upgraded deploy pipeline for ${DOMAIN} ==="
+      bash scripts/deploy.sh "${DOMAIN}"
+
+      setup_cloudflare_tunnel
+      validate_secrets
 
       log "✅ Final release deployed on https://${DOMAIN}"
       log "Monitor: docker compose logs -f app worker cloudflared"
       ;;
+    k8s)
+      bash scripts/deploy-k8s.sh "${DOMAIN}"
+      ;;
     *)
-      log "Unsupported mode: ${MODE}. Use docker-full or full-e2e."
+      log "Unsupported mode: ${MODE}. Use docker-full, full-e2e, or k8s."
       exit 1
       ;;
   esac
