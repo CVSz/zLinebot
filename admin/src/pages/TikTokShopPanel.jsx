@@ -54,6 +54,7 @@ export default function TikTokShopPanel() {
     setLoading(true);
     try {
       const response = await fetch("/api/admin/tiktok-shop/intelligence", { headers: apiHeaders });
+      if (!response.ok) throw new Error("Failed to load intelligence");
       const payload = await response.json();
       setInsight(payload.aiSummary || "");
     } finally {
