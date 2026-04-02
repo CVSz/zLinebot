@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { verifyTikTokSignature } from "../security/signature.js";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -137,21 +138,5 @@ export function verifyWebhookSignature(options: {
   signature: string;
   timestamp: string;
 }): boolean {
-  try {
-    const expected = crypto
-      .createHmac("sha256", options.secret)
-      .update(`${options.timestamp}.${options.requestBody}`)
-      .digest("hex");
-
-    const expectedBuffer = Buffer.from(expected, "hex");
-    const signatureBuffer = Buffer.from(options.signature, "hex");
-
-    if (expectedBuffer.length !== signatureBuffer.length) {
-      return false;
-    }
-
-    return crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
-  } catch {
-    return false;
-  }
+  return verifyTikTokSignature(options);
 }
