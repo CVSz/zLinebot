@@ -1,4 +1,6 @@
 import { prisma } from "@zlinebot/db";
+import { trackUsage } from "@zlinebot/billing/usage";
+import { log } from "@zlinebot/automation/logger";
 
 export async function executeAutomation(job: any) {
   const { automationId, payload } = job.data;
@@ -23,16 +25,39 @@ export async function executeAutomation(job: any) {
       await runAction(step, context);
     }
   }
+
+  await trackUsage(automation.tenantId, "automation_run");
+  await log(automation.tenantId, "Automation executed", job.data);
+}
+
+function resolveValue(value: any, ctx: any) {
+  if (typeof value === "string" && value.startsWith("$")) {
+    return ctx[value.replace("$", "")];
+  }
+  return value;
 }
 
 function evalCondition(step: any, ctx: any) {
-  if (!step?.field) return false;
-  return ctx[step.field] === step.value;
+  const left = resolveValue(step.field, ctx);
+  const right = resolveValue(step.value, ctx);
+
+  switch (step.operator) {
+    case "equals":
+      return left === right;
+    case "contains":
+      return String(left ?? "").includes(String(right ?? ""));
+    default:
+      return false;
+  }
 }
 
 async function runAction(step: any, _ctx: any) {
+  if (step.action === "delay") {
+    await new Promise(r => setTimeout(r, Number(step.ms) || 0));
+  }
+
   if (step.action === "auto_reply") {
-    console.log("Reply:", step.message);
+    console.log("Reply:", resolveValue(step.message, _ctx));
     // integrate TikTok send message API
   }
 }

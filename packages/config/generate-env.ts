@@ -27,6 +27,7 @@ TIKTOK_REDIRECT_URI=https://zlinebot.zeaz.dev/auth/tiktok/callback
 
 STRIPE_SECRET=
 STRIPE_PRICE_PRO=
+STRIPE_WEBHOOK_SECRET=
 
 APP_URL=https://zlinebot.zeaz.dev
 `;
