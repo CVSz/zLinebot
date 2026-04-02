@@ -1,0 +1,68 @@
+name: Master Meta Full Release – Kubernetes + GHCR + Cloudflare
+
+on:
+  push:
+    branches: [main, master]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/zlinebot:latest
+            ghcr.io/${{ github.repository_owner }}/zlinebot:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/zlinebot:${{ github.ref_name }}
+
+  deploy-to-kubernetes:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+      - name: Configure kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          kubectl config current-context
+
+      - name: Update deployment image (rolling update)
+        run: |
+          kubectl set image deployment/zlinebot-core zlinebot-app=ghcr.io/${{ github.repository_owner }}/zlinebot:${{ github.sha }} -n zlinebot
+          kubectl rollout status deployment/zlinebot-core -n zlinebot --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n zlinebot
+          kubectl get ingress -n zlinebot
