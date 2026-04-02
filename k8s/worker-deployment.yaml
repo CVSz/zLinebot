@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: worker
+  namespace: zlinebot
 spec:
   replicas: 5
   selector:
@@ -14,4 +15,7 @@ spec:
     spec:
       containers:
         - name: worker
-          image: zlinebot-worker
+          image: zlinebot-worker:latest
+          envFrom:
+            - secretRef:
+                name: zlinebot-secret
