@@ -13,7 +13,6 @@ import { logsRoutes } from "./routes/logs";
 import { healthRoutes } from "./routes/health";
 import { rateLimitPlugin } from "./plugins/rateLimit";
 import { register, httpRequests } from "./metrics";
-import { initTracer } from "./tracing";
 import { authMiddleware } from "./middleware/auth";
 
 const app = Fastify();
@@ -29,13 +28,8 @@ app.register(helmet);
 app.register(rateLimitPlugin);
 app.register(rawBody, { global: false, runFirst: true });
 
-app.addHook("onRequest", async (req: any) => {
-  req.span = tracer.startSpan(req.url);
-});
-
-app.addHook("onResponse", async (req: any) => {
+app.addHook("onResponse", async () => {
   httpRequests.inc();
-  if (req.span) req.span.finish();
 });
 
 app.get("/metrics", async (_req, reply) => {

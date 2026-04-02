@@ -5,16 +5,6 @@ import { initWorkerTracer } from "./tracing";
 
 const redisUrl = new URL(process.env.REDIS_URL ?? "redis://redis:6379");
 const queueBackend = (process.env.AUTOMATION_QUEUE_BACKEND ?? "bullmq").toLowerCase();
-const tracer = initWorkerTracer();
-
-async function executeWithTrace(job: any) {
-  const span = tracer.startSpan("automation.execute");
-  try {
-    await executeAutomation(job);
-  } finally {
-    span.finish();
-  }
-}
 
 async function runKafkaWorker() {
   await consumer.connect();
@@ -41,7 +31,7 @@ async function runKafkaWorker() {
         }
       };
 
-      await executeWithTrace(job);
+      await executeAutomation(job);
     }
   });
 }
@@ -53,7 +43,7 @@ if (queueBackend === "kafka") {
     "automation",
     async job => {
       if (job.name === "execute") {
-        await executeWithTrace(job);
+        await executeAutomation(job);
       }
     },
     {

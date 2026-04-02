@@ -21,9 +21,11 @@ fi
 CURRENT="$(cat "$CURRENT_FILE")"
 if [[ "$CURRENT" == "blue" ]]; then
   NEXT="green"
+  CURRENT_PORT=3001
   NEXT_PORT=3002
 else
   NEXT="blue"
+  CURRENT_PORT=3002
   NEXT_PORT=3001
 fi
 
