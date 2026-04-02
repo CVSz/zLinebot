@@ -1,0 +1,70 @@
+# ============================================================
+# zLinebot Codex Master Full Meta Final Release Codacy Setting
+# Unified configuration for code quality, security, and style
+# ============================================================
+
+engines:
+  eslint:
+    enabled: true
+    config: .eslintrc.json
+  pylint:
+    enabled: true
+    config: .pylintrc
+  shellcheck:
+    enabled: true
+  bandit:
+    enabled: true
+  markdownlint:
+    enabled: true
+
+exclude_paths:
+  - "node_modules/**"
+  - "venv/**"
+  - "dist/**"
+  - "build/**"
+  - "tests/mocks/**"
+
+patterns:
+  - pattern: "**/*.js"
+    engine: eslint
+  - pattern: "**/*.py"
+    engine: pylint
+  - pattern: "**/*.sh"
+    engine: shellcheck
+  - pattern: "**/*.md"
+    engine: markdownlint
+
+quality_settings:
+  coverage:
+    minimum: 80
+  duplication:
+    threshold: 5
+  complexity:
+    max: 10
+
+security_settings:
+  severity_threshold: medium
+  ignore:
+    - "tests/**"
+    - "examples/**"
+
+reporting:
+  format: "json"
+  output: "codacy-report.json"
+
+notifications:
+  slack:
+    enabled: true
+    channel: "#ci-cd"
+  github:
+    enabled: true
+    status_check: true
+
+release:
+  artifacts:
+    - "codacy-report.json"
+    - "coverage/lcov.info"
+    - "CHANGELOG.md"
+  tagging:
+    enabled: true
+    format: "v${version}"
