@@ -33,6 +33,7 @@ write_if_missing "$ROOT_DIR/package.json" '{
   }
 }'
 
+# shellcheck disable=SC2016 # "$schema" is a literal JSON key.
 write_if_missing "$ROOT_DIR/turbo.json" '{
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
