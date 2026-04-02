@@ -59,6 +59,17 @@ function requireNonEmpty(name: string, value: string | undefined): string {
   return value;
 }
 
+
+function ensureSecretStrength(name: string, value: string | undefined, minLength = 32): void {
+  if (!value) {
+    return;
+  }
+
+  if (value.length < minLength) {
+    throw new Error(`${name} must be at least ${minLength} characters in production`);
+  }
+}
+
 const defaultTenantId = process.env.LINE_DEFAULT_TENANT_ID?.trim() || "demo";
 const lineChannelSecret = process.env.LINE_CHANNEL_SECRET?.trim();
 const lineChannelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN?.trim();
@@ -73,6 +84,13 @@ const corsOrigin = process.env.CORS_ORIGIN?.trim();
 const openaiApiKey = process.env.OPENAI_API_KEY?.trim();
 const openaiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
 const encryptionKey = process.env.ENCRYPTION_KEY?.trim();
+const isProduction = (process.env.NODE_ENV?.trim().toLowerCase() ?? "development") === "production";
+
+if (isProduction) {
+  ensureSecretStrength("JWT_SECRET", process.env.JWT_SECRET?.trim());
+  ensureSecretStrength("SESSION_SECRET", process.env.SESSION_SECRET?.trim());
+  ensureSecretStrength("LINE_CHANNEL_SECRET", lineChannelSecret);
+}
 
 export const env = Object.freeze({
   port: parsePort(process.env.PORT),
