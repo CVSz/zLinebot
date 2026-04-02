@@ -1,75 +1,108 @@
 # ZLineBot
 
-> EN | [TH (ภาษาไทย)](README_th.md)
+ZLineBot is a multi-tenant commerce + conversational AI platform designed for LINE-centric businesses that need production APIs, operational control panels, compliance controls, and an extensible AI/ML stack.
 
-ZLineBot is a multi-tenant commerce + conversational AI platform with LINE integration, product/cart/order APIs, realtime metrics, and operations/compliance modules.
+> Language docs: [README (TH)](docs/README_th.md)
 
-## Key Features
-- Multi-tenant request isolation (`x-api-key`, `x-tenant-id`)
-- Commerce APIs: products, cart, orders, billing
-- LINE webhook bot integration with signature verification
-- TikTok OAuth + webhook integration (auth URL, callback, signed webhooks)
-- TikTok Shop control panel + automated showcase-to-video draft generation
-- Realtime metrics over WebSocket (`/ws`)
-- Privacy and DSR APIs (consent/access/delete/rectify)
-- Flexible deployment: Docker Compose, scripts, Kubernetes manifests
+## 1) What this repository provides
 
-## Architecture at a Glance
-- **Backend:** Express + TypeScript (`app/`)
-- **Admin UI:** React + Vite (`admin/`)
-- **Mobile samples:** React Native snippets (`mobile/`)
-- **Data:** Postgres, Redis, Kafka, ClickHouse, Qdrant, Flink assets
-- **Infra:** Docker, k8s manifests, Terraform/Cloudflare artifacts
+- **Backend APIs (TypeScript/Express)** for products, carts, orders, billing, privacy/DSR, TikTok/LINE integrations, observability, and policy control.
+- **Admin web app (React/Vite)** for operations, billing, dashboarding, and TikTok Shop workflows.
+- **Data + infra assets** (Postgres schemas, Kafka/Flink assets, Docker Compose, K8s manifests, Terraform/Cloudflare).
+- **AI/ML modules** including ranking/recommendation scaffolding, RL components, world-model experiments, and feature-store hooks.
 
-## Quick Start
+## 2) System architecture (high level)
+
+- `app/` — core API, business logic, service integrations, policy/guardrails, agents, RL, identity, privacy, compliance.
+- `admin/` — operational console UI.
+- `docs/` — manuals, roadmap/proposal/presentation, governance/localization docs, API schema.
+- `db/` + `warehouse/` — schema and analytics SQL.
+- `docker/`, `k8s/`, `infra/`, `cloudflare/`, `cloud/` — deployment and platform artifacts.
+- `ml/` + `flink/` — ML training/serving helpers and stream-processing jobs.
+
+For deeper structure notes, see **[docs/REPO_STRUCTURE.md](docs/REPO_STRUCTURE.md)**.
+
+## 3) Quick start (local)
+
 ```bash
 cp .env.example .env
 docker compose up -d --build
 curl http://localhost:3000/health
 ```
 
-## Core API Endpoints
-Headers:
+Expected: health endpoint returns JSON `{"ok": true}` or equivalent healthy response.
+
+## 4) Core runtime requirements
+
+- Docker Engine + Docker Compose
+- Linux/macOS shell environment
+- Optional for dev workflow: Node.js 20+, npm, Python 3.10+
+
+For complete setup options (minimal/no-cost/full production-like), see **[docs/INSTALL_FULL.md](docs/INSTALL_FULL.md)**.
+
+## 5) Tenant model and required headers
+
+Most tenant-scoped routes require:
+
 - `x-api-key: <TENANT_API_KEY>`
 - `x-tenant-id: <tenant_id>`
 
-Endpoints:
-- `GET /products`, `POST /products`
-- `GET /cart/:userId`, `POST /cart`
-- `GET /orders`, `POST /orders`
-- `GET /admin/health`, `GET /admin/billing`
-- `POST /admin/audit/ledger-export`
-- `POST /privacy/consent`, `GET /privacy/consent/:userId`, `POST /privacy/dsr`
-- `GET /auth/tiktok/url`, `GET /auth/tiktok/callback`, `POST /webhook/tiktok`
-- `GET /admin/tiktok-shop/overview`, `POST /admin/tiktok-shop/sync-showcase`, `POST /admin/tiktok-shop/auto-video`
+Typical functional domains:
 
-## Realtime Metrics
-- WebSocket: `ws://<host>/ws`
-- Message type: `metrics`
-- Payload fields: `messages`, `orders`, `payments`
+- Commerce: `/products`, `/cart`, `/orders`
+- Admin: `/admin/health`, `/admin/billing`, `/admin/audit/*`
+- Privacy: `/privacy/consent`, `/privacy/dsr`
+- Integrations: `/auth/tiktok/*`, `/webhook/tiktok`, `/line/*`
+- Realtime: `/ws`
 
-## Documentation
-### Manuals
-- [User Manual (EN)](user_manual_en.md)
-- [User Manual (TH)](user_manual_th.md)
-- [Admin Manual (EN)](admin_manual_en.md)
-- [Admin Manual (TH)](admin_manual_th.md)
-- [Install Manual (EN)](install_manual_en.md)
-- [Install Manual (TH)](install_manual_th.md)
+Canonical route implementations live in `app/src/routes/`.
 
-### Project Documents
-- [Repository Structure & Upgrade Readiness](docs/REPO_STRUCTURE.md)
-- [Quick README (EN, archived)](docs/readme_en.md)
-- [Quick README (TH, archived)](docs/readme_th.md)
-- [Blueprint (EN)](blueprint_en.md)
-- [Blueprint (TH)](blueprint_th.md)
-- [Roadmap (EN)](roadmaps_en.md)
-- [Roadmap (TH)](roadmaps_th.md)
-- [Presentation (EN)](presentation_en.md)
-- [Presentation (TH)](presentation_th.md)
+## 6) Full documentation map
 
-## GitHub Community Files
-- [Code of Conduct](CODE_OF_CONDUCT.md) | [TH](CODE_OF_CONDUCT_th.md)
-- [Contributing](CONTRIBUTING.md) | [TH](CONTRIBUTING_th.md)
-- [Security](SECURITY.md) | [TH](SECURITY_th.md)
-- [License](LICENSE) | [EN copy](LICENSE_EN.md) | [TH guide](LICENSE_TH.md)
+### Essential manuals
+- **Installation (full detail):** [docs/INSTALL_FULL.md](docs/INSTALL_FULL.md)
+- User Manual (EN): [docs/user_manual_en.md](docs/user_manual_en.md)
+- User Manual (TH): [docs/user_manual_th.md](docs/user_manual_th.md)
+- Admin Manual (EN): [docs/admin_manual_en.md](docs/admin_manual_en.md)
+- Admin Manual (TH): [docs/admin_manual_th.md](docs/admin_manual_th.md)
+- Install Manual (EN): [docs/install_manual_en.md](docs/install_manual_en.md)
+- Install Manual (TH): [docs/install_manual_th.md](docs/install_manual_th.md)
+
+### Planning / product docs
+- **Proposal (full detail):** [docs/PROPOSAL_FULL.md](docs/PROPOSAL_FULL.md)
+- Blueprint (EN): [docs/blueprint_en.md](docs/blueprint_en.md)
+- Blueprint (TH): [docs/blueprint_th.md](docs/blueprint_th.md)
+- Roadmap (EN): [docs/roadmaps_en.md](docs/roadmaps_en.md)
+- Roadmap (TH): [docs/roadmaps_th.md](docs/roadmaps_th.md)
+- Presentation (EN): [docs/presentation_en.md](docs/presentation_en.md)
+- Presentation (TH): [docs/presentation_th.md](docs/presentation_th.md)
+
+### Operations / technical references
+- Repo structure: [docs/REPO_STRUCTURE.md](docs/REPO_STRUCTURE.md)
+- OpenAPI reference: [docs/openapi.yaml](docs/openapi.yaml)
+- Existing docs bundle: [docs/MANUAL.md](docs/MANUAL.md), [docs/ADMIN.md](docs/ADMIN.md), [docs/USER.md](docs/USER.md)
+
+### Archived/readme redirects
+- [docs/readme_en.md](docs/readme_en.md)
+- [docs/readme_th.md](docs/readme_th.md)
+- [docs/readme_en_redirect.md](docs/readme_en_redirect.md)
+- [docs/readme_th_redirect.md](docs/readme_th_redirect.md)
+
+## 7) GitHub community files kept at repository root
+
+To keep GitHub-native discovery and security workflows intact, these remain at root:
+
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Repository README](README.md)
+- [License](LICENSE)
+
+Localized variants are in `docs/`.
+
+## 8) Recommended next steps
+
+1. Complete environment secrets in `.env`.
+2. Start stack and verify `/health` + key tenant routes.
+3. Read **INSTALL_FULL** and **PROPOSAL_FULL** to choose rollout strategy.
+4. Use manuals in `docs/` for operator and admin onboarding.

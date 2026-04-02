@@ -1,6 +1,6 @@
 # ZLineBot (ภาษาไทย)
 
-> [EN](README.md) | TH
+> [EN](../README.md) | TH
 
 ZLineBot คือแพลตฟอร์มคอมเมิร์ซแบบหลาย tenant ที่มีความสามารถด้าน conversational AI, เชื่อมต่อ LINE, มี API สำหรับสินค้า/ตะกร้า/ออเดอร์, ระบบ metrics แบบเรียลไทม์ และโมดูลด้านการปฏิบัติการ/คอมพลายแอนซ์
 
@@ -49,9 +49,9 @@ Endpoints:
 - [Install Manual (TH)](install_manual_th.md)
 
 ### เอกสารโครงการ
-- [โครงสร้าง Repository และความพร้อมสำหรับการอัปเกรด](docs/REPO_STRUCTURE.md)
-- [Quick README (EN, archived)](docs/readme_en.md)
-- [Quick README (TH, archived)](docs/readme_th.md)
+- [โครงสร้าง Repository และความพร้อมสำหรับการอัปเกรด](REPO_STRUCTURE.md)
+- [Quick README (EN, archived)](readme_en.md)
+- [Quick README (TH, archived)](readme_th.md)
 - [Blueprint (EN)](blueprint_en.md)
 - [Blueprint (TH)](blueprint_th.md)
 - [Roadmap (EN)](roadmaps_en.md)
@@ -60,7 +60,7 @@ Endpoints:
 - [Presentation (TH)](presentation_th.md)
 
 ## ไฟล์มาตรฐาน GitHub
-- [Code of Conduct](CODE_OF_CONDUCT.md) | [TH](CODE_OF_CONDUCT_th.md)
-- [Contributing](CONTRIBUTING.md) | [TH](CONTRIBUTING_th.md)
-- [Security](SECURITY.md) | [TH](SECURITY_th.md)
-- [License](LICENSE) | [EN copy](LICENSE_EN.md) | [TH guide](LICENSE_TH.md)
+- [Code of Conduct](../CODE_OF_CONDUCT.md) | [TH](CODE_OF_CONDUCT_th.md)
+- [Contributing](../CONTRIBUTING.md) | [TH](CONTRIBUTING_th.md)
+- [Security](../SECURITY.md) | [TH](SECURITY_th.md)
+- [License](../LICENSE) | [EN copy](LICENSE_EN.md) | [TH guide](LICENSE_TH.md)
