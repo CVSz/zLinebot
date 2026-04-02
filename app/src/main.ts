@@ -77,10 +77,13 @@ const server = http.createServer(app);
 let shuttingDown = false;
 
 startAggregator();
-const automationWorker = startAutomationWorker();
-automationWorker.on("failed", (job, error) => {
-  console.error("automation job failed", job?.id, error);
-});
+let automationWorker: ReturnType<typeof startAutomationWorker> | undefined;
+if (env.automationWorkerMode === "embedded") {
+  automationWorker = startAutomationWorker();
+  automationWorker.on("failed", (job, error) => {
+    console.error("automation job failed", job?.id, error);
+  });
+}
 
 if (env.featureSyncEnabled) {
   startFeatureSyncConsumer().catch((error: unknown) => {
@@ -112,7 +115,9 @@ function shutdown(signal: NodeJS.Signals): void {
   // eslint-disable-next-line no-console
   console.log(`${signal} received, shutting down gracefully`);
 
-  void automationWorker.close();
+  if (automationWorker) {
+    void automationWorker.close();
+  }
 
   server.close(() => {
     process.exit(0);

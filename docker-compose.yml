@@ -11,10 +11,23 @@ services:
       - qdrant
       - ollama
       - kafka
+    environment:
+      AUTOMATION_WORKER_MODE: external
 
   admin:
     build: ./admin
     restart: always
+
+  worker:
+    build: ./app
+    restart: always
+    env_file: .env
+    command: ["npm", "run", "worker"]
+    environment:
+      AUTOMATION_WORKER_MODE: external
+    depends_on:
+      - postgres
+      - redis
 
   postgres:
     image: postgres:15
@@ -79,6 +92,7 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
     depends_on:
