@@ -2,9 +2,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 ENV ONNXRUNTIME_NODE_INSTALL=skip
 COPY app/package*.json ./
-RUN npm ci --only=production --ignore-scripts
+RUN npm install --ignore-scripts
 COPY app/ ./
-RUN npm run build
+RUN npm run build && npm prune --omit=dev --ignore-scripts
 
 FROM node:20-alpine
 WORKDIR /app
