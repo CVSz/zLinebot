@@ -21,7 +21,7 @@ jobs:
         run: docker build -t zlinebot .
 
       - name: Log in to Fly registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: registry.fly.io
           username: x
