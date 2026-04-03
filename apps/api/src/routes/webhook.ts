@@ -53,6 +53,17 @@ type TenantAutoReplyProfile = {
   name: "vip" | "enterprise" | "default";
   prefix: string;
   signature?: string;
+  escalationQueue: "priority" | "standard";
+};
+
+type AutoReplyIntent = "support" | "pricing" | "order" | "general";
+type AutoReplyPriority = "high" | "normal";
+
+type TenantAutoReplyDecision = {
+  text: string;
+  intent: AutoReplyIntent;
+  priority: AutoReplyPriority;
+  profile: TenantAutoReplyProfile["name"];
 };
 
 const redis = new Redis(process.env.REDIS_URL ?? "redis://redis:6379", {
@@ -230,15 +241,31 @@ function parseAutoReplyOverrides(): Record<string, Partial<TenantAutoReplyProfil
   }
 }
 
-const tenantAutoReplyOverrides = parseAutoReplyOverrides();
+function sanitizeText(text: string): string {
+  return text.replace(/\s+/g, " ").trim().slice(0, 160);
+}
+
+function autoReplyIntent(message: string): AutoReplyIntent {
+  if (/(refund|cancel|problem|urgent|fail|issue|error|complain)/i.test(message)) {
+    return "support";
+  }
+  if (/(price|discount|promo|deal|coupon|quote)/i.test(message)) {
+    return "pricing";
+  }
+  if (/(order|ship|tracking|delivery|invoice)/i.test(message)) {
+    return "order";
+  }
+  return "general";
+}
 
 function tenantAutoReplyProfile(tenantId: string): TenantAutoReplyProfile {
   const normalized = tenantId.toLowerCase();
+  const tenantAutoReplyOverrides = parseAutoReplyOverrides();
   const baseProfile: TenantAutoReplyProfile = normalized.startsWith("vip")
-    ? { name: "vip", prefix: "VIP concierge", signature: "Priority desk" }
+    ? { name: "vip", prefix: "VIP concierge", signature: "Priority desk", escalationQueue: "priority" }
     : normalized.includes("enterprise")
-      ? { name: "enterprise", prefix: "Enterprise CRM", signature: "Account success team" }
-      : { name: "default", prefix: "Auto-reply", signature: "zLinebot assistant" };
+      ? { name: "enterprise", prefix: "Enterprise CRM", signature: "Account success team", escalationQueue: "standard" }
+      : { name: "default", prefix: "Auto-reply", signature: "zLinebot assistant", escalationQueue: "standard" };
 
   const override = tenantAutoReplyOverrides[tenantId] ?? tenantAutoReplyOverrides[normalized];
   if (!override) {
@@ -251,25 +278,56 @@ function tenantAutoReplyProfile(tenantId: string): TenantAutoReplyProfile {
   };
 }
 
-function buildTenantAutoReply(tenantId: string, incomingText: string): string {
-  const text = incomingText.trim();
+function buildTenantAutoReply(tenantId: string, incomingText: string): TenantAutoReplyDecision {
+  const text = sanitizeText(incomingText);
   const profile = tenantAutoReplyProfile(tenantId);
   const shortText = text.slice(0, 120);
   const suffix = profile.signature ? ` • ${profile.signature}` : "";
+  const intent = autoReplyIntent(text);
+  const priority: AutoReplyPriority = intent === "support" || profile.escalationQueue === "priority" ? "high" : "normal";
 
   if (!text) {
-    return `${profile.prefix} (${tenantId}): Thanks for contacting us. A specialist will follow up shortly.${suffix}`;
+    return {
+      text: `${profile.prefix} (${tenantId}): Thanks for contacting us. A specialist will follow up shortly.${suffix}`,
+      intent: "general",
+      priority,
+      profile: profile.name
+    };
   }
 
-  if (/(refund|cancel|problem|urgent|fail|issue)/i.test(text)) {
-    return `${profile.prefix} (${tenantId}): We flagged your request as priority and opened a support workflow for "${shortText}".${suffix}`;
+  if (intent === "support") {
+    return {
+      text: `${profile.prefix} (${tenantId}): We flagged your request as priority and opened a support workflow for "${shortText}".${suffix}`,
+      intent,
+      priority,
+      profile: profile.name
+    };
   }
 
-  if (/(price|discount|promo|deal)/i.test(text)) {
-    return `${profile.prefix} (${tenantId}): We captured your pricing request for "${shortText}" and will send the best offer shortly.${suffix}`;
+  if (intent === "pricing") {
+    return {
+      text: `${profile.prefix} (${tenantId}): We captured your pricing request for "${shortText}" and will send the best offer shortly.${suffix}`,
+      intent,
+      priority,
+      profile: profile.name
+    };
   }
 
-  return `${profile.prefix} (${tenantId}): We received "${shortText}" and are preparing the next best action.${suffix}`;
+  if (intent === "order") {
+    return {
+      text: `${profile.prefix} (${tenantId}): Your fulfillment request "${shortText}" is now in our order workflow.${suffix}`,
+      intent,
+      priority,
+      profile: profile.name
+    };
+  }
+
+  return {
+    text: `${profile.prefix} (${tenantId}): We received "${shortText}" and are preparing the next best action.${suffix}`,
+    intent,
+    priority,
+    profile: profile.name
+  };
 }
 
 export async function webhookRoutes(app: any) {
@@ -324,7 +382,12 @@ export async function webhookRoutes(app: any) {
       await processEvent("tiktok.message", {
         ...event,
         tenantId,
-        autoReply,
+        autoReply: autoReply.text,
+        autoReplyMeta: {
+          intent: autoReply.intent,
+          priority: autoReply.priority,
+          profile: autoReply.profile
+        },
         memoryKey: `conv:${tenantId}:${conversationId}`
       });
       timer();
@@ -367,7 +430,12 @@ export async function webhookRoutes(app: any) {
           tenantId,
           destination: payload.destination,
           event,
-          autoReply,
+          autoReply: autoReply.text,
+          autoReplyMeta: {
+            intent: autoReply.intent,
+            priority: autoReply.priority,
+            profile: autoReply.profile
+          },
           memoryKey: `conv:${tenantId}:${conversationId}`
         });
         timer();
