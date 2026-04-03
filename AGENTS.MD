@@ -138,7 +138,3 @@ All agents are built to be **privacy-first**, **observable**, **resilient**, and
 - [ ] Documentation synchronized with `copilot-instructions.md` and repository structure.
 
 ---
-
-This `AGENTS.md` file is now the canonical source of truth for the zLinebot multi-agent system. It is ready for immediate placement in the repository root (or `docs/agents.md` if preferred). All future development, code generation, and operational decisions must reference this document.
-
-Should any clarification, additional agent specifications, or diagram requirements arise, please provide further details for refinement.
