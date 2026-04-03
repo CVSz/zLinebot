@@ -5,7 +5,7 @@
 ## 1. Operations Scope
 Admin manages tenant configuration, billing visibility, compliance, and incident response.
 
-## 2. Admin Interfaces
+## 2. Admin Control Panel
 - Web dashboard (`admin/`) for realtime metrics
 - API endpoints:
   - `GET /admin/health`

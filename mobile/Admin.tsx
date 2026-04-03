@@ -90,7 +90,7 @@ export default function Admin() {
 
   return (
     <ScrollView style={{ padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 8 }}>Admin Control Panel</Text>
+      <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 8 }}>all feature master meta full final release complete</Text>
       <Text style={{ marginBottom: 14 }}>Open incidents: {openIncidents}</Text>
 
       <View style={cardStyle}>
