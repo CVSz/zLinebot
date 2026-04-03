@@ -20,7 +20,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
+    command: tunnel --no-autoupdate run ${CLOUDFLARED_TUNNEL:-zlinebot}
     env_file: .env
     volumes:
       - ./cloudflared:/root/.cloudflared

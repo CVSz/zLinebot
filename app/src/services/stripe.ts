@@ -1,10 +1,21 @@
 import Stripe from "stripe";
+import { env } from "../utils/env.js";
 
-const stripe = new Stripe(process.env.STRIPE_KEY ?? "", {
-  apiVersion: "2025-02-24.acacia"
-});
+const stripeSecretKey = env.stripeSecretKey ?? process.env.STRIPE_KEY?.trim();
+
+function getStripeClient(): Stripe {
+  if (!stripeSecretKey) {
+    throw new Error("Stripe is not configured. Set STRIPE_SECRET_KEY.");
+  }
+
+  return new Stripe(stripeSecretKey, {
+    apiVersion: "2025-02-24.acacia"
+  });
+}
 
 export async function createCheckout(amount: number, metadata: Record<string, string>) {
+  const stripe = getStripeClient();
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [
