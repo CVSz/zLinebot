@@ -1,170 +1,195 @@
-# zLinebot AI Copilot Instructions – Master Reference
+**Status:** Master Meta Full Final Release – Version 2.0  
+**Date:** 03 April 2026  
+**Repository:** https://github.com/CVSz/zLinebot  
+**Purpose of this Update:** This document has been comprehensively revised to serve as the definitive, authoritative, and complete instruction set for all AI Copilot agents and contributors. It now fully incorporates every feature, component, and architectural element of the zLinebot platform, establishing the Master Meta Full Final Release.
 
-**Version:** 1.4 (Updated 2026-04-03 – Monitoring, Security, and Deployment Enhancements)
-**Repository:** [CVSz/zLinebot](https://github.com/CVSz/zLinebot)
-**Date:** 03 April 2026
-**Status:** Production-Ready Master Reference
+---
+
+# zLinebot AI Copilot Instructions – Master Meta Full Final Release
+
+**Version:** 2.0 (Master Meta Full Final Release)  
+**Repository:** [CVSz/zLinebot](https://github.com/CVSz/zLinebot)  
+**Date:** 03 April 2026  
+**Status:** Production-Ready, Comprehensive Master Reference
 
 ---
 
 ## 1. Purpose
 
-This document is the **authoritative instruction set** for AI Copilot agents working on **zLinebot**, covering:
+This document constitutes the **single authoritative instruction set** for all AI Copilot agents, developers, and automated systems working on **zLinebot**. It provides exhaustive guidance on:
 
-* Full deep-dive analysis of the repository
-* ML services, LINE Bot security, deployment, and monitoring
-* Best practices for code generation, refactoring, debugging, and observability
+- The complete platform vision and every implemented feature.
+- Architectural principles, system workflows, and component interactions.
+- Security, privacy, observability, deployment, and scalability requirements.
+- Precise code-generation, refactoring, debugging, and documentation standards.
 
-All future code contributions must comply with these guidelines.
-
----
-
-## 2. Repository Overview
-
-**zLinebot** features:
-
-* **Frontend:** LINE Messaging API
-* **Backend:** TypeScript/Node.js
-* **ML Services:** Python pipelines (RL, ranking, anomaly detection, federated learning)
-* **Infrastructure:** Docker, Kubernetes, Cloudflare Workers, Terraform, Istio
-* **Edge Strategy:** Cloudflare Workers for low-latency webhook handling
+All future contributions, code generation, and modifications **must** strictly adhere to these guidelines. This version represents the Master Meta Full Final Release, consolidating all features across messaging, AI/ML, data infrastructure, Web3, cloud-native operations, and governance layers.
 
 ---
 
-## 3. Repository Structure
+## 2. Project Vision & Full Feature Overview
 
-```text
+**zLinebot** is a full-stack AI-native platform that unifies LINE Messaging as the primary user surface with advanced machine-learning pipelines, real-time data processing, Web3 integration, and cloud-native infrastructure. It functions as an intelligent commerce and automation ecosystem rather than a conventional chatbot.
+
+**Core Capabilities (Master Feature Inventory):**
+
+**A. Conversational & Commerce Core**  
+- LINE webhook handling and message orchestration (Cloudflare Workers + TypeScript backend).  
+- Product, order, cart, and lifecycle management with PromptPay/Stripe integration.  
+- Intelligent conversation-to-transaction flows.
+
+**B. AI Decisioning & Recommendation**  
+- Recommendation/ranking services (vector search, hybrid retrieval).  
+- Contextual bandit, reinforcement learning (RL), reward modeling, and IPS/DR evaluation.  
+- Transformer/two-tower/foundation-model helpers.  
+- Explainability, policy updates, and counterfactual evaluation.  
+- Federated learning and privacy-preserving ML (FHE-ready pathways).
+
+**C. Automation & Agentic Layer**  
+- Multi-agent modules for pricing, sales, risk, economy, negotiation, supply, policy, SLA, and kill-switch management.  
+- Automation compiler, plugin/runner pipelines, scheduler, and queue workers.
+
+**D. Data, Features & Streaming**  
+- Comprehensive SQL schemas (events, features, billing, audit, privacy, RLHF).  
+- Feature store synchronization and data warehouse.  
+- Apache Flink stream-processing jobs for feature joins and materialization.  
+- Kafka producers/consumers for real-time pipelines.
+
+**E. Security, Privacy & Trust**  
+- Zero-trust architecture, tenant isolation, and runtime guardrails.  
+- PDPA/GDPR compliance, DSR handling, audit logging, and evidence generation.  
+- HMAC-SHA256 signature verification, payload sanitization, and secret rotation.
+
+**F. Admin, Mobile & UX Surfaces**  
+- React/Vite admin dashboard (dashboard, automations, logs, builder, billing, live monitoring).  
+- React Native companion mobile application.
+
+**G. Infrastructure & Delivery**  
+- Docker / Docker Compose (multiple variants: full, observability-focused, blue-green).  
+- Kubernetes + Istio manifests with autoscaling and service mesh.  
+- Terraform infrastructure definitions and Cloudflare Workers edge routing.  
+- Nginx API gateway and secure tunnel support.
+
+**H. Web3 Integration**  
+- Solidity smart contracts for tokenized economy, negotiation, causal modules, and loyalty mechanisms.
+
+**I. Observability & Resilience**  
+- OpenTelemetry distributed tracing, structured logging (Loki/ELK), Prometheus metrics, Jaeger tracing, and Grafana dashboards.  
+- Self-healing scripts, circuit breakers, dead-letter queues, and SLA monitoring.
+
+---
+
+## 3. Repository Structure (Canonical)
+
+```
 zLinebot/
-├── app/                  # TypeScript backend
-├── cloudflare/           # Edge Workers for LINE webhook
-├── cloud/                # Worker implementations
-├── cloudflared/          # Secure tunnel scripts
-├── ml/                   # Python ML pipelines
-├── db/                   # SQL schemas and migrations
-├── warehouse/            # Analytics and feature store
-├── flink/                # Apache Flink jobs
-├── k8s/                  # Kubernetes + Istio manifests
-├── infra/                # Terraform infrastructure
-├── docker/               # Dockerfiles/docker-compose
-├── nginx/                # API gateway configs
+├── app/                  # TypeScript/Node.js backend services
 ├── admin/                # React/Vite admin dashboard
-├── mobile/               # React Native companion app
+├── mobile/               # React Native mobile application
+├── ml/                   # Python ML pipelines (RL, ranking, anomaly, federated)
+├── db/                   # SQL schemas and migrations
+├── warehouse/            # Analytics warehouse & feature store
+├── flink/                # Apache Flink stream jobs
 ├── contracts/            # Solidity smart contracts
-├── scripts/              # Orchestration scripts
-├── docs/                 # Documentation
+├── cloudflare/           # Edge Workers for LINE webhooks
+├── cloud/                # Additional worker implementations
+├── docker/               # Dockerfiles and Compose configurations
+├── k8s/                  # Kubernetes + Istio manifests
+├── infra/                # Terraform infrastructure as code
+├── nginx/                # API gateway configurations
+├── scripts/              # Deployment, secrets, watchdog, and automation scripts
+├── docs/                 # Documentation (including FEATURE_DEEP_IMPACT_DIVE_2026-04.md)
 ├── .github/              # CI/CD workflows
 ├── SECURITY.md           # Security policies
-├── install_*.sh          # Installation scripts
 └── zlinebot-master-orchestrator.sh
 ```
 
-**Deployment Insight:** Cloudflare Workers handle webhook requests at the edge. Backend and ML services scale independently via Docker/Kubernetes.
+---
+
+## 4. Architectural & System Design Principles
+
+- **Edge-First Processing:** Cloudflare Workers handle LINE webhooks at the edge for minimal latency; return HTTP 200 within < 3 seconds.
+- **Async ML Offload:** All heavy inference (ranking, RL, anomaly detection) occurs asynchronously via Redis/gRPC queues.
+- **Domain-Driven Design:** Strict module boundaries with clear ownership.
+- **Privacy by Design:** Anonymized logging, PDPA-compliant data handling, and federated learning readiness.
+- **Zero-Trust & Resilience:** Mandatory mTLS, circuit breakers, dead-letter queues, and tenant isolation.
+- **Observability-Native:** Every component must emit OpenTelemetry traces (including anonymized user ID and trace ID).
+- **Future-Proofing:** Maintain compatibility with LLM agents, real-time personalization, multi-region deployment, and tokenized ecosystems.
 
 ---
 
-## 4. ML Services Interaction
+## 5. Technology Stack & Component Guidelines
 
-**Workflow:**
+**Backend:** TypeScript/Node.js (strict mode), ESLint, Prettier.  
+**ML Services:** Python pipelines with gRPC/protobuf preferred; REST fallback for development.  
+**Infrastructure:** Docker, Kubernetes + Istio, Terraform, Cloudflare Workers, Nginx.  
+**Data:** PostgreSQL/CockroachDB schemas, Apache Flink, Kafka, feature store.  
+**Frontend:** React/Vite (admin), React Native (mobile).  
+**Web3:** Solidity contracts in `contracts/`.  
+**Observability:** OpenTelemetry, Prometheus, Grafana, Jaeger/Loki.
 
-1. **Ingress:** LINE message → Cloudflare Worker → backend (`app/`)
-2. **Event Routing:** Backend parses event → determines ML enrichment
-3. **Async Offload:** Heavy ML inference via Redis/gRPC queues (never synchronous)
-4. **ML Processing:** Python pipelines generate predictions (ranking, anomaly alerts)
-5. **Response Generation:** Backend formats Flex Message or text reply → LINE API
-6. **Observability:** OpenTelemetry traces with trace ID and anonymized user ID
-
-**Best Practices:**
-
-* Prefer gRPC in Kubernetes; REST fallback for local dev
-* Use protobuf for feature vectors
-* Scale ML services independently
-* Implement dead-letter queues and fallback LINE replies
-* Include unit and integration tests for ML → LINE round-trip
+**Component-Specific Directives:**  
+- Backend handlers must validate signatures and sanitize inputs.  
+- ML services must implement dead-letter queues and fallback replies.  
+- Web3 contracts must follow security best practices and include audit documentation.  
+- Infrastructure manifests must support blue-green deployments and zero-downtime updates.
 
 ---
 
-## 5. Security Framework
+## 6. Security Framework
 
-| Layer         | Control                                       | Location                  | Rule                              |
-| ------------- | --------------------------------------------- | ------------------------- | --------------------------------- |
-| Edge          | Cloudflare WAF, rate limiting, bot management | `cloudflare/`             | Always active                     |
-| Signature     | HMAC-SHA256 verification                      | Worker + backend          | Reject invalid requests           |
-| Auth          | Channel token validation                      | `app/src/security/`       | Validate every request            |
-| Privacy       | PDPA compliance                               | `privacy/`                | Log anonymized; delete on request |
-| Transport     | TLS 1.3, Istio mTLS                           | `k8s/`                    | Mandatory in production           |
-| Input         | Payload sanitization                          | `app/src/line/handler.ts` | Reject malformed events           |
-| Secrets       | K8s/Cloudflare secrets                        | `.env.example`            | Validate at startup               |
-| Observability | Structured logs & traces                      | All layers                | Include trace IDs                 |
-| Resilience    | Circuit breakers, DLQs                        | Middleware                | Prevent cascading failures        |
-| Compliance    | Secret rotation, PDPA audit                   | CI/CD + `SECURITY.md`     | Document each release             |
-
-**Extra Directives:** Rotate secrets quarterly, enforce rate limits, and filter ML calls for privacy.
+All layers enforce: Cloudflare WAF, HMAC-SHA256 verification, channel token validation, TLS 1.3/mTLS, payload sanitization, secret hygiene (chmod 600), and quarterly rotation. Compliance with PDPA/GDPR is mandatory; audit trails and DSR endpoints are required.
 
 ---
 
-## 6. Deployment Strategies
+## 7. Deployment Strategies
 
-**Tiers:**
-
-1. **Local Dev:** Docker Compose, Cloudflared tunnel, webhook testing
-2. **Staging:** Cloudflare Worker via `wrangler`, WAF enabled, validate with LINE simulator
-3. **Production:** Kubernetes + Istio, Terraform, Cloudflare Worker edge, independent ML scaling
-
-**Best Practices:**
-
-* HTTPS webhook with TLS 1.2+
-* Return 200 OK <3s
-* Structured observability (logs, traces)
-* Separate staging/production environments
+- **Local:** Docker Compose + Cloudflared tunnel.  
+- **Staging:** Cloudflare Workers (wrangler) with WAF and LINE simulator validation.  
+- **Production:** Kubernetes + Istio, Terraform-provisioned, Cloudflare edge fronting, independent ML scaling, blue-green deployments.
 
 ---
 
-## 7. Monitoring Tools
+## 8. Monitoring & Observability
 
-**Layers:**
-
-* **Edge:** Cloudflare observability (latency, errors)
-* **Backend:** OpenTelemetry + structured logs
-* **ML:** Prometheus metrics
-* **Kubernetes:** Prometheus + Grafana + Alertmanager
-* **Logging/Tracing:** ELK/Loki, Jaeger
-
-**Guidelines:**
-
-* Validate dashboards in staging
-* Set alerts for SLA/security events
-* Include synthetic LINE events in CI/CD validation
+- Edge: Cloudflare analytics.  
+- Backend/ML/K8s: Prometheus + Grafana + Alertmanager.  
+- Tracing/Logging: OpenTelemetry, Jaeger, Loki.  
+- Alerts must cover SLA violations, security events, and synthetic LINE event validation.
 
 ---
 
-## 8. Development Conventions
+## 9. Development & Code Quality Standards
 
-* TypeScript strict mode + ESLint + Prettier
-* Domain-driven design module boundaries
-* Conventional commits & CI/CD gates
-* Secrets never committed; validate `.env`
-* Unit/integration tests in `line/` and `ml/`
-* Update documentation with API or feature changes
+- Conventional commits, strict TypeScript, full test coverage (unit + integration).  
+- Secrets never committed; `.env.example` validation at startup.  
+- Documentation and deep-impact analysis must be synchronized with every major change.  
+- CI/CD gates: linting, security scans (CodeQL), and automated audits via `codex.sh audit`.
 
 ---
 
-## 9. Copilot Operational Directives
+## 10. Copilot Operational Meta-Rules (Master Edition)
 
-* **Context Priority:** Monitoring → Deployment → Security → ML → Privacy → Performance → UX
-* **Language:** English unless requested
-* **Change Suggestion:** Always include file path, diff/full function, rationale, impact
-* **Refactoring:** Never break webhook SLA
-* **Future-Proofing:** Maintain LLM/federated learning compatibility
+- **Priority Order:** Security → Privacy → Observability → Performance → Scalability → UX.  
+- **Output Format:** Always specify file path, full diff or function, rationale, and business impact.  
+- **Refactoring Rule:** Never degrade webhook SLA or introduce synchronous ML calls.  
+- **Language:** English (unless explicitly requested otherwise).  
+- **Vision Alignment:** Every change must advance the AI-native, privacy-first, cloud-native, and Web3-enabled ecosystem.
+
+---
+
+## 11. Master Meta Full Final Release Checklist
+
+- [ ] All features from Sections 2 and 3 fully implemented and documented.  
+- [ ] End-to-end observability (traces, metrics, logs) propagates across every layer.  
+- [ ] Security, privacy, and compliance controls verified (including PDPA audit).  
+- [ ] Web3 contracts audited and integrated.  
+- [ ] Deployment pipelines support zero-downtime, multi-environment, and multi-region scenarios.  
+- [ ] Monitoring dashboards and alerts validated with synthetic events.  
+- [ ] Deep-impact analysis (`docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`) cross-referenced and current.  
+- [ ] CI/CD automated audit (`codex.sh audit`) passes with zero critical findings.  
+- [ ] All documentation synchronized and this Copilot instructions file updated to v2.0 Master Meta Full Final Release.
 
 ---
 
-## 10. Final Release Checklist
-
-* [ ] Monitoring instrumentation in place
-* [ ] End-to-end metrics/logs/traces propagate
-* [ ] Monitoring stack validated
-* [ ] Alerts cover SLA/security events
-* [ ] Documentation synchronized
-* [ ] Copilot instructions updated
-
----
+This updated file is now ready for immediate replacement in the repository at `.github/copilot-instructions.md`. It provides the complete, final reference required for sustained development and maintenance of the zLinebot platform at the highest professional standard. Should any clarification or additional refinement be required, please provide further details.
