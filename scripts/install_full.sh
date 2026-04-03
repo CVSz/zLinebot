@@ -62,7 +62,12 @@ run_npm_install_autoheal() {
   fi
 
   log "⚠️ npm install failed in ${package_dir}, running auto-heal retry"
-  (cd "${package_dir}" && npm cache verify || true)
+  (
+    cd "${package_dir}"
+    if ! npm cache verify; then
+      log "⚠️ npm cache verify failed in ${package_dir}, continuing auto-heal fallback"
+    fi
+  )
   (cd "${package_dir}" && ONNXRUNTIME_NODE_INSTALL=skip NODE_OPTIONS="--dns-result-order=ipv4first" npm install --ignore-scripts --no-audit --no-fund)
 }
 
