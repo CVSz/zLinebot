@@ -191,5 +191,3 @@ All layers enforce: Cloudflare WAF, HMAC-SHA256 verification, channel token vali
 - [ ] All documentation synchronized and this Copilot instructions file updated to v2.0 Master Meta Full Final Release.
 
 ---
-
-This updated file is now ready for immediate replacement in the repository at `.github/copilot-instructions.md`. It provides the complete, final reference required for sustained development and maintenance of the zLinebot platform at the highest professional standard. Should any clarification or additional refinement be required, please provide further details.
