@@ -57,7 +57,7 @@ const cardStyle = {
 export default function Admin() {
   const [state, setState] = useState<AdminState>(initialState);
   const [announcement, setAnnouncement] = useState("");
-  const [status, setStatus] = useState("Control center online");
+  const [status, setStatus] = useState("Control Center Online");
 
   const openIncidents = useMemo(() => state.incidents.filter((incident) => !incident.acknowledged).length, [state]);
 
@@ -90,7 +90,7 @@ export default function Admin() {
 
   return (
     <ScrollView style={{ padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 8 }}>all feature master meta full final release complete</Text>
+      <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 8 }}>Admin Control Panel</Text>
       <Text style={{ marginBottom: 14 }}>Open incidents: {openIncidents}</Text>
 
       <View style={cardStyle}>
