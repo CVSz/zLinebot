@@ -131,11 +131,13 @@ zLinebot has evolved from a LINE bot into a **multi-layer AI commerce and automa
 This deep-impact report is the canonical analytical companion to:
 
 - `.github/copilot-instructions.md` (Master Meta Full Final Release v2.0), and
-- the **Final Release Complete Form** in Section 12 of that file.
+- the **Final Release Complete Form** in Section 12 of that file, and
+- `docs/META_FULL_IMPLEMENT_ALL_FEATURES_2026-04-03.md` (feature-by-feature implementation matrix).
 
 For release governance, treat these two documents as a synchronized pair:
 1. **Instruction authority:** `.github/copilot-instructions.md`
 2. **Impact authority:** `docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`
+3. **Implementation authority:** `docs/META_FULL_IMPLEMENT_ALL_FEATURES_2026-04-03.md`
 
 
 ---

@@ -178,17 +178,19 @@ All layers enforce: Cloudflare WAF, HMAC-SHA256 verification, channel token vali
 
 ---
 
-## 11. Master Meta Full Final Release Checklist
+## 11. Master Meta Full Final Release Checklist (Evidence-Gated)
 
-- [x] All features from Sections 2 and 3 fully implemented and documented.  
-- [x] End-to-end observability (traces, metrics, logs) propagates across every layer.  
-- [x] Security, privacy, and compliance controls verified (including PDPA audit).  
-- [x] Web3 contracts audited and integrated.  
-- [x] Deployment pipelines support zero-downtime, multi-environment, and multi-region scenarios.  
-- [x] Monitoring dashboards and alerts validated with synthetic events.  
-- [x] Deep-impact analysis (`docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`) cross-referenced and current.  
-- [x] CI/CD automated audit (`bash codex.sh audit`) passes with zero critical findings.  
-- [x] All documentation synchronized and this Copilot instructions file updated to v2.0 Master Meta Full Final Release.
+> **Rule:** checklist items can be marked complete only when linked evidence exists in code, tests, or generated reports.
+
+- [ ] All features from Sections 2 and 3 fully implemented and documented (track in `docs/META_FULL_IMPLEMENT_ALL_FEATURES_2026-04-03.md`).  
+- [ ] End-to-end observability (traces, metrics, logs) propagates across every layer (attach trace IDs + dashboard screenshots).  
+- [ ] Security, privacy, and compliance controls verified (including PDPA audit evidence).  
+- [ ] Web3 contracts audited and integrated (audit report required).  
+- [ ] Deployment pipelines support zero-downtime, multi-environment, and multi-region scenarios (staging/prod rollout evidence required).  
+- [ ] Monitoring dashboards and alerts validated with synthetic events (alert proof required).  
+- [ ] Deep-impact analysis (`docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`) cross-referenced and current.  
+- [ ] CI/CD automated audit (`bash codex.sh audit`) passes with zero critical findings (attach report artifact).  
+- [ ] All documentation synchronized and this Copilot instructions file updated to v2.0 Master Meta Full Final Release.
 
 ---
 
@@ -199,26 +201,28 @@ All layers enforce: Cloudflare WAF, HMAC-SHA256 verification, channel token vali
 **Release Date:** 03 April 2026  
 **Repository:** https://github.com/CVSz/zLinebot  
 **Deep-Impact Reference:** `docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`  
+**Implementation Matrix:** `docs/META_FULL_IMPLEMENT_ALL_FEATURES_2026-04-03.md`  
 **Automated Audit Command:** `bash codex.sh audit`
 
 ### Completion Declaration
 
-This repository is declared in **complete form** for the Master Meta Full Final Release baseline.  
-All platform layers (conversational commerce, AI/ML decisioning, automation agents, data/streaming, security/privacy, UX surfaces, infrastructure, Web3, and observability) are documented, integrated, and release-aligned under this instruction set.
+The release is managed under an **evidence-gated complete form** process.  
+The implementation matrix defines module-level completion, remaining gaps, and validation artifacts required before final production sign-off.
 
-### Operational Acceptance Criteria (Completed)
+### Operational Acceptance Criteria
 
-1. Security-first architecture and privacy-by-design controls are documented and enforced.
-2. Observability coverage is defined across edge, services, streaming, and infrastructure.
-3. Deployment strategies cover local, staging, and production with zero-downtime patterns.
-4. Governance, compliance, and audit paths are represented in code and documentation.
+1. Security-first architecture and privacy-by-design controls are documented and testable.
+2. Observability coverage is demonstrated across edge, services, queues, streaming, and infrastructure.
+3. Deployment strategies support local, staging, and production with zero-downtime patterns.
+4. Governance, compliance, and audit paths are represented in code, docs, and generated evidence.
 5. Deep-impact analysis and Copilot operational rules are synchronized for execution.
 
 ### Sign-off Metadata
 
-- **Status:** Approved – Production Ready  
+- **Status:** In Verification  
 - **Instruction Authority:** `.github/copilot-instructions.md` (this file)  
 - **Execution Guide:** `docs/FEATURE_DEEP_IMPACT_DIVE_2026-04.md`  
+- **Implementation Guide:** `docs/META_FULL_IMPLEMENT_ALL_FEATURES_2026-04-03.md`  
 - **Change Governance:** Conventional commits + CI/CD + automated audit gate
 
 ---
