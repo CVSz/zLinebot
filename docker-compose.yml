@@ -20,10 +20,8 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --no-autoupdate run ${CLOUDFLARED_TUNNEL:-zlinebot}
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     env_file: .env
-    volumes:
-      - ./cloudflared:/root/.cloudflared
     depends_on:
       - app
 

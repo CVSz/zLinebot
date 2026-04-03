@@ -208,6 +208,19 @@ CF_API_TOKEN=<token> CF_ZONE_ID=<zone_id> ./scripts/configure_cloudflare.sh infr
 
 For CI/CD automation, use `.github/workflows/cloudflare-config.yml` with GitHub secrets `CF_API_TOKEN` and `CF_ZONE_ID`.
 
+### 🔐 Cloudflare Zero Trust Tunnel Token (API)
+
+You can fetch and write the tunnel token directly from the Zero Trust API:
+
+```bash
+CLOUDFLARE_API_TOKEN=<token> \
+CLOUDFLARE_ACCOUNT_ID=<account_id> \
+CLOUDFLARE_TUNNEL_ID=<tunnel_id> \
+./scripts/fetch_cloudflare_tunnel_token.sh .env
+```
+
+This updates `CLOUDFLARE_TUNNEL_TOKEN` in `.env` for `docker compose`.
+
 ---
 
 ## 🔮 Roadmap
