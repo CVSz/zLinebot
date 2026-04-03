@@ -92,8 +92,6 @@ PY
 
 find_dns_record_id() {
   local name="$1"
-  local query_url="${api_base}/zones/${zone_id}/dns_records?type=CNAME&name=${name}"
-
   if [[ "${DRY_RUN}" == "true" ]]; then
     echo ""
     return 0

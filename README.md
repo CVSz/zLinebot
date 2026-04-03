@@ -194,7 +194,7 @@ Notes:
 ## 🚀 Deployment Options
 
 - Local development (Docker Compose)
-- Cloud deployment (Fly.io / Cloudflare)
+- Cloud deployment (Cloudflare / self-hosted VM/Kubernetes)
 - Kubernetes cluster (production scale)
 - Edge deployment (Cloudflare Workers)
 

@@ -18,15 +18,15 @@ run_ci() {
 }
 
 run_cd() {
-  local image_ref="${FLY_REGISTRY:-registry.fly.io/zlinebot}:latest"
+  local image_ref="${DOCKER_IMAGE_REF:-ghcr.io/cvsz/zlinebot}:latest"
 
-  if [[ -z "${FLY_API_TOKEN:-}" ]]; then
-    echo "ERROR: FLY_API_TOKEN is required for cd mode" >&2
+  if [[ -z "${DOCKER_REGISTRY:-}" || -z "${DOCKER_USERNAME:-}" || -z "${DOCKER_PASSWORD:-}" ]]; then
+    echo "ERROR: DOCKER_REGISTRY, DOCKER_USERNAME, and DOCKER_PASSWORD are required for cd mode" >&2
     exit 1
   fi
 
-  echo "==> Logging into Fly registry"
-  echo "$FLY_API_TOKEN" | docker login registry.fly.io -u x --password-stdin
+  echo "==> Logging into container registry: ${DOCKER_REGISTRY}"
+  echo "$DOCKER_PASSWORD" | docker login "${DOCKER_REGISTRY}" -u "${DOCKER_USERNAME}" --password-stdin
 
   echo "==> Pushing image: ${image_ref}"
   docker tag zlinebot:ci "$image_ref"

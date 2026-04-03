@@ -3,5 +3,5 @@ credentials-file: /root/.cloudflared/<id>.json
 
 ingress:
   - hostname: zlinebot.zeaz.dev
-    service: https://zlinebot.fly.dev
+    service: http://app:3000
   - service: http_status:404

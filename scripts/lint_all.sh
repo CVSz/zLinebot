@@ -18,7 +18,7 @@ echo "==> Type-checking backend (TypeScript)"
   npm config delete proxy || true
   npm config delete http-proxy || true
   npm config delete https-proxy || true
-  NODE_OPTIONS="${NODE_OPTIONS:---dns-result-order=ipv4first}" npm install --no-audit --no-fund --no-package-lock
+  ONNXRUNTIME_NODE_INSTALL=skip NODE_OPTIONS="${NODE_OPTIONS:---dns-result-order=ipv4first}" npm install --ignore-scripts --no-audit --no-fund --no-package-lock
   npm run build
 )
 
