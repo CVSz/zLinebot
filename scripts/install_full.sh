@@ -42,6 +42,21 @@ fi
 cd "${REPO_ROOT}"
 cp .env.example .env 2>/dev/null || true
 
+
+TENANT_IDS_CSV="${TENANT_IDS:-default}"
+IFS="," read -r -a TENANT_IDS <<<"${TENANT_IDS_CSV}"
+
+install_tenant_namespace() {
+  local tenant="$1"
+  local namespace="zlinebot-${tenant}"
+
+  log "🏢 Preparing tenant namespace: ${namespace}"
+  kubectl create namespace "${namespace}" --dry-run=client -o yaml | kubectl apply -f -
+  kubectl apply -n "${namespace}" -f k8s/core.yaml
+  kubectl apply -n "${namespace}" -f k8s/redpanda.yaml
+}
+
+
 run_npm_install_autoheal() {
   local package_dir="$1"
   local install_mode="${2:-standard}"
@@ -94,8 +109,10 @@ run_npm_install_autoheal apps/worker standard
 
 pip install torch shap Pyfhel scikit-learn
 
-kubectl apply -f k8s/core.yaml
-kubectl apply -f k8s/redpanda.yaml
+for tenant in "${TENANT_IDS[@]}"; do
+  install_tenant_namespace "${tenant}"
+done
+
 kubectl apply -f k8s/observability.yaml
 
 docker compose -f docker/compose.full.yml up -d qdrant

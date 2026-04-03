@@ -12,6 +12,10 @@ spec:
     metadata:
       labels:
         app: api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: api
@@ -28,6 +32,11 @@ spec:
           envFrom:
             - secretRef:
                 name: zlinebot-secret
+          env:
+            - name: TENANT_MODE
+              value: "multi"
+            - name: PROMETHEUS_METRICS_ENABLED
+              value: "true"
           readinessProbe:
             httpGet:
               path: /health

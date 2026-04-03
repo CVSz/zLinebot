@@ -3,13 +3,19 @@ export type Quote = {
   price: number;
   fee: number;
   latencyMs: number;
+  depth?: number;
 };
 
 export type ArbitrageOpportunity = {
   buy: Quote & { eff: number };
   sell: Quote & { eff: number };
   spread: number;
+  spreadPct: number;
+  minExecutableSize: number;
 };
+
+const MIN_SPREAD_PCT = Number(process.env.ARB_MIN_SPREAD_PCT ?? 0.02);
+const MAX_LATENCY_MS = Number(process.env.ARB_MAX_LATENCY_MS ?? 1500);
 
 export function findArb(quotes: Quote[]): ArbitrageOpportunity | null {
   if (quotes.length < 2) {
@@ -27,8 +33,19 @@ export function findArb(quotes: Quote[]): ArbitrageOpportunity | null {
   }
 
   const spread = sell.eff - buy.eff;
-  const isGoodSpread = spread > 0.02 * buy.eff;
-  const acceptableLatency = sell.latencyMs < 1500;
+  const spreadPct = spread / buy.eff;
+  const acceptableLatency = sell.latencyMs < MAX_LATENCY_MS && buy.latencyMs < MAX_LATENCY_MS;
+  const minExecutableSize = Math.min(buy.depth ?? Number.POSITIVE_INFINITY, sell.depth ?? Number.POSITIVE_INFINITY);
 
-  return isGoodSpread && acceptableLatency ? { buy, sell, spread } : null;
+  if (spreadPct < MIN_SPREAD_PCT || !acceptableLatency || minExecutableSize <= 0) {
+    return null;
+  }
+
+  return {
+    buy,
+    sell,
+    spread,
+    spreadPct,
+    minExecutableSize: Number.isFinite(minExecutableSize) ? minExecutableSize : 0
+  };
 }
