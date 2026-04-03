@@ -35,7 +35,7 @@ This script runs:
 Runs only on push to `main` (after CI passes).
 
 1. Build image.
-2. Push image to Fly registry using `FLY_API_TOKEN`.
+2. Push image to a container registry using Docker credentials.
 3. Deployment logic is executed through:
    - `./scripts/master_meta_full_source_ci_cd.sh cd`
 
@@ -46,5 +46,5 @@ Runs only on push to `main` (after CI passes).
 ```
 
 ```bash
-FLY_API_TOKEN=... FLY_REGISTRY=registry.fly.io/zlinebot ./scripts/master_meta_full_source_ci_cd.sh cd
+DOCKER_REGISTRY=ghcr.io DOCKER_USERNAME=<user> DOCKER_PASSWORD=<token> DOCKER_IMAGE_REF=ghcr.io/<org>/zlinebot ./scripts/master_meta_full_source_ci_cd.sh cd
 ```

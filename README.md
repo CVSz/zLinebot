@@ -194,7 +194,7 @@ Notes:
 ## 🚀 Deployment Options
 
 - Local development (Docker Compose)
-- Cloud deployment (Fly.io / Cloudflare)
+- Cloud deployment (Cloudflare / self-hosted VM/Kubernetes)
 - Kubernetes cluster (production scale)
 - Edge deployment (Cloudflare Workers)
 
@@ -207,6 +207,38 @@ CF_API_TOKEN=<token> CF_ZONE_ID=<zone_id> ./scripts/configure_cloudflare.sh infr
 ```
 
 For CI/CD automation, use `.github/workflows/cloudflare-config.yml` with GitHub secrets `CF_API_TOKEN` and `CF_ZONE_ID`.
+
+### 🧩 Zero Trust full automation for `*.zeaz.dev` + `zlinebot.zeaz.dev`
+
+This repository includes one-step automation for Tunnel ingress + DNS records:
+
+```bash
+CLOUDFLARE_API_TOKEN=<token> \
+CLOUDFLARE_ACCOUNT_ID=<account_id> \
+CLOUDFLARE_ZONE_ID=<zone_id> \
+CLOUDFLARE_TUNNEL_ID=<tunnel_id> \
+./scripts/configure_cloudflare_zero_trust_full.sh
+```
+
+Optional overrides:
+- `CLOUDFLARE_BASE_DOMAIN` (default `zeaz.dev`)
+- `CLOUDFLARE_PRIMARY_HOSTNAME` (default `zlinebot.<base-domain>`)
+- `CLOUDFLARE_WILDCARD_HOSTNAME` (default `*.<base-domain>`)
+- `CLOUDFLARE_TUNNEL_SERVICE_URL` (default `http://app:3000`)
+- `DRY_RUN=true` for preview mode.
+
+### 🔐 Cloudflare Zero Trust Tunnel Token (API)
+
+You can fetch and write the tunnel token directly from the Zero Trust API:
+
+```bash
+CLOUDFLARE_API_TOKEN=<token> \
+CLOUDFLARE_ACCOUNT_ID=<account_id> \
+CLOUDFLARE_TUNNEL_ID=<tunnel_id> \
+./scripts/fetch_cloudflare_tunnel_token.sh .env
+```
+
+This updates `CLOUDFLARE_TUNNEL_TOKEN` in `.env` for `docker compose`.
 
 ---
 

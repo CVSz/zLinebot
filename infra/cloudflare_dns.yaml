@@ -1,4 +1,8 @@
 records:
+  - name: "zlinebot.zeaz.dev"
+    type: CNAME
+    value: <tunnel-id>.cfargotunnel.com
+    proxied: true
   - name: "*.zeaz.dev"
     type: CNAME
     value: <tunnel-id>.cfargotunnel.com
