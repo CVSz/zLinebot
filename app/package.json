@@ -48,8 +48,5 @@
   },
   "overrides": {
     "tar": "^7.5.13"
-  },
-  "optionalDependencies": {
-    "onnxruntime-node": "^1.22.0"
   }
 }
