@@ -119,5 +119,6 @@ export const env = Object.freeze({
   openaiApiKey: openaiApiKey && openaiApiKey.length > 0 ? openaiApiKey : undefined,
   openaiModel,
   encryptionKey: encryptionKey && encryptionKey.length > 0 ? encryptionKey : undefined,
-  automationWorkerMode: parseWorkerMode(process.env.AUTOMATION_WORKER_MODE)
+  automationWorkerMode: parseWorkerMode(process.env.AUTOMATION_WORKER_MODE),
+  tiktokStreamWorkerEnabled: parseBoolean(process.env.TIKTOK_STREAM_WORKER_ENABLED, true)
 });

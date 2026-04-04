@@ -8,6 +8,7 @@ import {
   fetchUserInfo,
   verifyWebhookSignature
 } from "../services/tiktok.js";
+import { enqueueTikTokWebhookEvent } from "../services/tiktok.stream.js";
 
 type RawRequest = {
   rawBody?: string;
@@ -112,11 +113,13 @@ tiktokRouter.post("/webhook/tiktok", tiktokLimiter, rawBodyJson, async (req, res
     return res.status(200).json({ challenge: body.challenge });
   }
 
+  const streamId = await enqueueTikTokWebhookEvent(req.body as Record<string, unknown>);
+
   // eslint-disable-next-line no-console
-  console.log("tiktok webhook event", {
+  console.log("tiktok webhook queued", {
     event: body.event ?? body.type ?? "unknown",
-    data: body.data ?? null
+    streamId
   });
 
-  return res.sendStatus(200);
+  return res.status(202).json({ accepted: true, streamId });
 });

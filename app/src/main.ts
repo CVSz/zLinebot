@@ -33,6 +33,7 @@ import { initializeRewardSystem } from "./rl/reward.js";
 import { initializeMultiAgentRewardSystem } from "./rl/multi-agent-reward.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { startAutomationWorker } from "./queue/automation.js";
+import { startTikTokStreamWorker } from "./services/tiktok.stream.js";
 
 dotenv.config();
 validateEnv();
@@ -105,6 +106,7 @@ let shuttingDown = false;
 
 startAggregator();
 let automationWorker: ReturnType<typeof startAutomationWorker> | undefined;
+let stopTikTokStreamWorker: (() => Promise<void>) | undefined;
 if (env.automationWorkerMode === "embedded") {
   automationWorker = startAutomationWorker();
   automationWorker.on("failed", (job, error) => {
@@ -117,6 +119,16 @@ if (env.featureSyncEnabled) {
     // eslint-disable-next-line no-console
     console.error("failed to start feature sync consumer", error);
   });
+}
+
+if (env.tiktokStreamWorkerEnabled) {
+  startTikTokStreamWorker()
+    .then((stopWorker) => {
+      stopTikTokStreamWorker = stopWorker;
+    })
+    .catch((error: unknown) => {
+      console.error("failed to start tiktok stream worker", error);
+    });
 }
 
 startWS(server, (req) => {
@@ -144,6 +156,10 @@ function shutdown(signal: NodeJS.Signals): void {
 
   if (automationWorker) {
     void automationWorker.close();
+  }
+
+  if (stopTikTokStreamWorker) {
+    void stopTikTokStreamWorker();
   }
 
   server.close(() => {
