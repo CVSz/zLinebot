@@ -3,8 +3,10 @@ import type { LineReplyMessage } from "./handler.js";
 import { handleMessage, handlePostback } from "./handler.js";
 import { env } from "../utils/env.js";
 import { verifyLineSignature } from "../security/signature.js";
+import { ensureRedisConnected, redis } from "../services/redis.js";
 
 type LineTextMessageEvent = {
+  webhookEventId?: string;
   type: "message";
   replyToken: string;
   source?: { userId?: string };
@@ -15,6 +17,7 @@ type LineTextMessageEvent = {
 };
 
 type LinePostbackEvent = {
+  webhookEventId?: string;
   type: "postback";
   replyToken: string;
   source?: { userId?: string };
@@ -73,13 +76,26 @@ webhookRouter.post(
 
     const token = env.lineChannelAccessToken;
 
-    void Promise.all(events.map((event) => handleEvent(event, token))).catch((error) => {
+    await ensureRedisConnected();
+    const dedupedEvents = await Promise.all(events.map(async (event) => ({
+      event,
+      isDuplicate: await isDuplicateLineEvent(event)
+    })));
+
+    void Promise.all(dedupedEvents.filter((item) => !item.isDuplicate).map((item) => handleEvent(item.event, token))).catch((error) => {
       // eslint-disable-next-line no-console
       console.error("line webhook processing failed", error);
     });
   }
 );
 
+
+async function isDuplicateLineEvent(event: LineWebhookEvent): Promise<boolean> {
+  const dedupeSource = [event.webhookEventId ?? "", event.replyToken, event.type].join(":");
+  const dedupeKey = `dedupe:line:${dedupeSource}`;
+  const result = await redis.set(dedupeKey, "1", "EX", 60 * 10, "NX");
+  return result === null;
+}
 async function handleEvent(event: LineWebhookEvent, channelAccessToken: string) {
   const tenantId = env.lineDefaultTenantId;
   const userId = event.source?.userId ?? "anonymous";
