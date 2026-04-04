@@ -18,6 +18,9 @@ type TikTokNormalizedEvent = {
   receivedAt: string;
 };
 
+type StreamEntry = [entryId: string, fields: string[]];
+type StreamReadResult = Array<[streamName: string, entries: StreamEntry[]]>;
+
 function normalizeString(value: unknown, fallback = ""): string {
   if (typeof value !== "string") {
     return fallback;
@@ -45,7 +48,7 @@ export async function enqueueTikTokWebhookEvent(body: Record<string, unknown>): 
     receivedAt: new Date().toISOString()
   };
 
-  return redis.xadd(
+  const streamEntryId = await redis.xadd(
     tiktokStream,
     "*",
     "eventType",
@@ -61,6 +64,12 @@ export async function enqueueTikTokWebhookEvent(body: Record<string, unknown>): 
     "receivedAt",
     normalized.receivedAt
   );
+
+  if (!streamEntryId) {
+    throw new Error("Unable to enqueue TikTok webhook event");
+  }
+
+  return streamEntryId;
 }
 
 async function ensureConsumerGroup(): Promise<void> {
@@ -88,6 +97,32 @@ function mapFieldsToRecord(fields: string[]): Record<string, string> {
   }
 
   return result;
+}
+
+function isStreamReadResult(value: unknown): value is StreamReadResult {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  return value.every((streamItem) => {
+    if (!Array.isArray(streamItem) || streamItem.length !== 2) {
+      return false;
+    }
+
+    const [streamName, entries] = streamItem;
+    if (typeof streamName !== "string" || !Array.isArray(entries)) {
+      return false;
+    }
+
+    return entries.every((entry) => {
+      if (!Array.isArray(entry) || entry.length !== 2) {
+        return false;
+      }
+
+      const [entryId, fields] = entry;
+      return typeof entryId === "string" && Array.isArray(fields) && fields.every((field) => typeof field === "string");
+    });
+  });
 }
 
 async function persistTikTokEvent(entryId: string, fields: Record<string, string>): Promise<void> {
@@ -168,6 +203,10 @@ export async function startTikTokStreamWorker(): Promise<() => Promise<void>> {
       );
 
       if (!response) {
+        continue;
+      }
+
+      if (!isStreamReadResult(response)) {
         continue;
       }
 
