@@ -1,8 +1,14 @@
-import * as ort from "onnxruntime-node";
+import { getOrt } from "./ort.js";
 
-let session: ort.InferenceSession | null = null;
+let session: { run(feeds: Record<string, unknown>): Promise<Record<string, { data: ArrayLike<number | bigint> }>> } | null = null;
 
 export async function loadTwoTower(modelPath = process.env.TWO_TOWER_MODEL_PATH ?? "/models/two_tower.onnx") {
+  const ort = await getOrt();
+  if (!ort) {
+    session = null;
+    return;
+  }
+
   session = await ort.InferenceSession.create(modelPath);
 }
 
@@ -18,6 +24,11 @@ export async function scoreTwoTower(userFeatures: number[], itemFeatures: number
 
   if (userFeatures.length === 0 || itemFeatures.length === 0) {
     throw new Error("Two-tower score requires non-empty user/item feature vectors");
+  }
+
+  const ort = await getOrt();
+  if (!ort) {
+    throw new Error("ONNX runtime is unavailable");
   }
 
   const output = await activeSession.run({

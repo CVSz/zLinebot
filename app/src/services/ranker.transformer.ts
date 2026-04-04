@@ -1,13 +1,24 @@
-import * as ort from "onnxruntime-node";
+import { getOrt } from "./ort.js";
 
-let session: ort.InferenceSession | null = null;
+let session: { run(feeds: Record<string, unknown>): Promise<Record<string, { data: ArrayLike<number | bigint> }>> } | null = null;
 
 export async function loadRanker(modelPath = process.env.RANKER_MODEL_PATH ?? "/models/ranker.onnx") {
+  const ort = await getOrt();
+  if (!ort) {
+    session = null;
+    return;
+  }
+
   session = await ort.InferenceSession.create(modelPath);
 }
 
 export async function scoreWithTransformer(inputIds: bigint[], mask: bigint[]) {
   if (!session) {
+    return 0;
+  }
+
+  const ort = await getOrt();
+  if (!ort) {
     return 0;
   }
 
