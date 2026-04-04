@@ -47,12 +47,14 @@ app.use(helmet());
 const allowedCorsOrigins = env.corsOrigin
   .split(",")
   .map((origin) => origin.trim())
-  .filter((origin) => origin.length > 0 && origin !== "*");
+  .filter((origin) => origin.length > 0);
+
+const allowAnyOrigin = allowedCorsOrigins.includes("*");
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin) {
+      if (allowAnyOrigin || !origin) {
         callback(null, true);
         return;
       }
