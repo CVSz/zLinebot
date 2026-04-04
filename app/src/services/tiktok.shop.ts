@@ -289,7 +289,7 @@ function parseShotPlan(script: string): string[] {
   const lines = script
     .split("\n")
     .map((line) => line.trim())
-    .filter((line) => /^\d+[\).\-]/.test(line) || line.toLowerCase().startsWith("scene"));
+    .filter((line) => /^\d+[).-]/.test(line) || line.toLowerCase().startsWith("scene"));
 
   return lines.slice(0, 6);
 }
