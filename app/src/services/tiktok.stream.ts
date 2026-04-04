@@ -65,7 +65,7 @@ export async function enqueueTikTokWebhookEvent(body: Record<string, unknown>): 
     normalized.receivedAt
   );
 
-  if (!streamEntryId) {
+  if (typeof streamEntryId !== "string" || streamEntryId.length === 0) {
     throw new Error("Unable to enqueue TikTok webhook event");
   }
 
@@ -206,11 +206,12 @@ export async function startTikTokStreamWorker(): Promise<() => Promise<void>> {
         continue;
       }
 
-      if (!isStreamReadResult(response)) {
+      const streamReadResult = isStreamReadResult(response) ? response : null;
+      if (!streamReadResult) {
         continue;
       }
 
-      for (const [, entries] of response) {
+      for (const [, entries] of streamReadResult) {
         for (const [entryId, fields] of entries) {
           await processStreamEntry(entryId, fields);
         }
