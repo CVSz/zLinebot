@@ -1,16 +1,27 @@
-import * as ort from "onnxruntime-node";
+import { getOrt } from "./ort.js";
 
-let session: ort.InferenceSession | null = null;
+let session: { run(feeds: Record<string, unknown>): Promise<Record<string, { data: ArrayLike<number | bigint> }>> } | null = null;
 
 const MODEL_PATH = process.env.RANK_MODEL_PATH ?? "/models/rank.onnx";
 
 export async function loadModel(path = MODEL_PATH) {
+  const ort = await getOrt();
+  if (!ort) {
+    session = null;
+    return;
+  }
+
   session = await ort.InferenceSession.create(path);
 }
 
 export async function inferScore(q: number[], u: number[], s: number[]) {
   if (!session) {
     throw new Error("ONNX ranking model is not loaded");
+  }
+
+  const ort = await getOrt();
+  if (!ort) {
+    throw new Error("ONNX runtime is unavailable");
   }
 
   const feeds = {
