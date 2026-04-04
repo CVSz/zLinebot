@@ -50,6 +50,7 @@ validate_secrets() {
     [[ -n "${LINE_CHANNEL_SECRET:-}" && ${#LINE_CHANNEL_SECRET} -ge 32 ]] || { log "❌ Weak LINE secret"; exit 1; }
     [[ -n "${JWT_SECRET:-}" && ${#JWT_SECRET} -ge 64 ]] || { log "❌ Weak JWT secret"; exit 1; }
     [[ -n "${TIKTOK_WEBHOOK_SECRET:-}" && ${#TIKTOK_WEBHOOK_SECRET} -ge 32 ]] || { log "❌ Weak TikTok webhook secret"; exit 1; }
+    [[ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]] || { log "❌ Missing CLOUDFLARE_TUNNEL_TOKEN in .env. Export it before deploy or run scripts/generate-secrets.sh --interactive."; exit 1; }
     log "✅ Secure .env validated"
   fi
 }

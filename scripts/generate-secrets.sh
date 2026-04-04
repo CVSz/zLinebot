@@ -75,6 +75,20 @@ CF_TUNNEL_TOKEN_VALUE=""
 CF_API_TOKEN_VALUE=""
 CF_ZONE_ID_VALUE=""
 
+if [[ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]]; then
+  CF_TUNNEL_TOKEN_VALUE="${CLOUDFLARE_TUNNEL_TOKEN}"
+elif [[ -n "${CF_TUNNEL_TOKEN:-}" ]]; then
+  CF_TUNNEL_TOKEN_VALUE="${CF_TUNNEL_TOKEN}"
+fi
+
+if [[ -n "${CF_API_TOKEN:-}" ]]; then
+  CF_API_TOKEN_VALUE="${CF_API_TOKEN}"
+fi
+
+if [[ -n "${CF_ZONE_ID:-}" ]]; then
+  CF_ZONE_ID_VALUE="${CF_ZONE_ID}"
+fi
+
 if [[ "${INTERACTIVE}" == "1" ]]; then
   echo "🧩 Interactive .env setup for Cloudflare, LINE, and TikTok"
   echo "Press Enter to accept the default shown in brackets."
@@ -92,6 +106,10 @@ if [[ "${INTERACTIVE}" == "1" ]]; then
   TIKTOK_CLIENT_SECRET_VALUE="$(prompt_value "TikTok client secret (TIKTOK_CLIENT_SECRET)" "${TIKTOK_CLIENT_SECRET_VALUE}" 1)"
   TIKTOK_WEBHOOK_SECRET_VALUE="$(prompt_value "TikTok webhook secret (TIKTOK_WEBHOOK_SECRET)" "${TIKTOK_WEBHOOK_SECRET_VALUE}" 1)"
   TIKTOK_SHOP_ACCESS_TOKEN_VALUE="$(prompt_value "TikTok shop access token (TIKTOK_SHOP_ACCESS_TOKEN)" "${TIKTOK_SHOP_ACCESS_TOKEN_VALUE}" 1)"
+fi
+
+if [[ "${INTERACTIVE}" != "1" && -z "${CF_TUNNEL_TOKEN_VALUE}" ]]; then
+  echo "⚠️ CLOUDFLARE_TUNNEL_TOKEN is empty. Export CLOUDFLARE_TUNNEL_TOKEN before deploy or rerun with --interactive." >&2
 fi
 
 cat >"${OUT_FILE}" <<EOF_ENV
