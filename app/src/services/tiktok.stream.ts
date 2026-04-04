@@ -45,7 +45,7 @@ export async function enqueueTikTokWebhookEvent(body: Record<string, unknown>): 
     receivedAt: new Date().toISOString()
   };
 
-  return redis.xadd(
+  const streamId = await redis.xadd(
     tiktokStream,
     "*",
     "eventType",
@@ -61,6 +61,42 @@ export async function enqueueTikTokWebhookEvent(body: Record<string, unknown>): 
     "receivedAt",
     normalized.receivedAt
   );
+
+  if (!streamId) {
+    throw new Error("Failed to enqueue TikTok webhook event");
+  }
+
+  return streamId;
+}
+
+type RedisStreamEntry = [string, string[]];
+type RedisStreamGroupResponse = Array<[string, RedisStreamEntry[]]>;
+
+function isRedisStreamGroupResponse(value: unknown): value is RedisStreamGroupResponse {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  return value.every((stream) => {
+    if (!Array.isArray(stream) || stream.length !== 2 || typeof stream[0] !== "string") {
+      return false;
+    }
+
+    const entries = stream[1];
+    if (!Array.isArray(entries)) {
+      return false;
+    }
+
+    return entries.every((entry) => {
+      return (
+        Array.isArray(entry) &&
+        entry.length === 2 &&
+        typeof entry[0] === "string" &&
+        Array.isArray(entry[1]) &&
+        entry[1].every((field) => typeof field === "string")
+      );
+    });
+  });
 }
 
 async function ensureConsumerGroup(): Promise<void> {
@@ -168,6 +204,11 @@ export async function startTikTokStreamWorker(): Promise<() => Promise<void>> {
       );
 
       if (!response) {
+        continue;
+      }
+
+      if (!isRedisStreamGroupResponse(response)) {
+        console.warn("unexpected redis xreadgroup response", response);
         continue;
       }
 
