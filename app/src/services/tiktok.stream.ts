@@ -208,7 +208,7 @@ export async function startTikTokStreamWorker(): Promise<() => Promise<void>> {
       }
 
       if (!isRedisStreamGroupResponse(response)) {
-        console.warn("unexpected redis xreadgroup response", response);
+        console.warn("unexpected redis xreadgroup response structure");
         continue;
       }
 
