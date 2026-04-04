@@ -6,7 +6,7 @@
     "dev": "tsx watch src/main.ts",
     "build": "tsc",
     "start": "node dist/main.js",
-    "lint": "eslint src --ext .ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts",
     "test": "echo \"No tests configured yet\" && exit 0",
     "worker": "tsx src/worker.ts"
   },
@@ -35,9 +35,9 @@
     "@types/pg": "^8.11.10",
     "@types/qrcode": "^1.5.5",
     "@types/ws": "^8.5.13",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "@typescript-eslint/parser": "^7.8.0",
-    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^8.30.1",
+    "@typescript-eslint/parser": "^8.30.1",
+    "eslint": "^9.23.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
